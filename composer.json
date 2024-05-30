@@ -1,0 +1,19 @@
+{
+    "name": "plantation/clover",
+    "description": "this is a mvc framework",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Plantation\\Clover\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "zeyuanlucky",
+            "email": "127177116+zeyuanlucky@users.noreply.github.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
