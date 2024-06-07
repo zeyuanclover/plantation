@@ -59,8 +59,33 @@ class File
         file_put_contents($file,'<?php return '.var_export($data,true).';');
     }
 
-    // 设置有效期
+    /**
+     * @param $name
+     * @param $expire
+     * 设置有效期
+     */
     public function expire($name,$expire){
+        $file = self::$path.$name.'.php';
+        if(is_file($file)) {
+            $data = include($file);
+            if ($expire==true){
+                $data['expire'] = $expire;
+            }else{
+                $data['expire'] = time()+$expire;
+            }
+            file_put_contents($file,'<?php return '.var_export($data,true).';');
+        }
+    }
 
+    /**
+     * @param $name
+     * 删除文件
+     */
+    public function delete($name)
+    {
+        $file = self::$path . $name . '.php';
+        if (is_file($file)) {
+            unlink($file);
+        }
     }
 }

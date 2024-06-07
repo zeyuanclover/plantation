@@ -27,7 +27,7 @@ class Cache
      */
     public static function instance($adapter)
     {
-        return self::$instance = new Cache($adapter);
+        return new Cache($adapter);
     }
 
     /**
@@ -55,5 +55,13 @@ class Cache
      */
     public function expire($name,$expire){
         $this->adapter->expire($name,$expire);
+    }
+
+    /**
+     * @param $name
+     * 删除
+     */
+    public function delete($name){
+        $this->adapter->delete($name);
     }
 }

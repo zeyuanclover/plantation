@@ -4,7 +4,7 @@
 namespace Plantation\Clover;
 
 
-class Cookie
+class Session
 {
     protected $adapter;
 
@@ -14,7 +14,7 @@ class Cookie
      * 实例化函数
      */
     public static function instance($instance){
-        return new Cookie($instance);
+        return new Session($instance);
     }
 
     /**
@@ -33,8 +33,8 @@ class Cookie
      * @return mixed
      * 设置cookie
      */
-    public function set($key,$data,$config=null){
-        return $this->adapter->set($key,$data,$config);
+    public function set($key,$data,$expire=true){
+        return $this->adapter->set($key,$data,$expire);
     }
 
     /**
@@ -53,5 +53,15 @@ class Cookie
      */
     public function delete($key){
         return $this->adapter->delete($key);
+    }
+
+    /**
+     * @param $key
+     * @param $expire
+     * @return mixed
+     * 设置有效期
+     */
+    public function expire($key,$expire){
+        return $this->adapter->expire($key,$expire);
     }
 }

@@ -32,12 +32,7 @@ class File
      */
     public static function instance($dirName)
     {
-        if (!self::$instance) {
-            self::$instance = new File($dirName);
-            return self::$instance;
-        } else {
-            return self::instance;
-        }
+       return new File($dirName);
     }
 
     /**
@@ -103,5 +98,25 @@ class File
         } while ($dirs); // 直到栈中没有目录
 
         return $rt;
+    }
+
+    // 删除目录下所有文件
+    function deleteDirectory($dir='') {
+        if(!$dir){
+            $dir = $this->dirName;
+        }
+        if (is_dir($dir)) {
+            $objects = scandir($dir);
+            foreach ($objects as $object) {
+                if ($object != "." && $object != "..") {
+                    if (is_dir($dir . "/" . $object)) {
+                        $this->deleteDirectory($dir . "/" . $object);
+                    } else {
+                        unlink($dir . "/" . $object);
+                    }
+                }
+            }
+            rmdir($dir);
+        }
     }
 }

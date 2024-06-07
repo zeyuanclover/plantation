@@ -7,19 +7,13 @@ use Plantation\Clover\Safe\Adapter\Certificate;
 class File{
 
     protected $config;
-    protected static $instance;
 
     /**
      * 调用函数
      * @return Cookie
      */
     public static function instance($data){
-        if (!self::$instance){
-            self::$instance = new File($data);
-            return self::$instance;
-        }else{
-            return self::$instance;
-        }
+        return new File($data);
     }
 
     public function __construct($data){
@@ -32,15 +26,19 @@ class File{
      * @return mixed|null
      */
     public function get($key){
-        $session = $_SESSION[$key];
+        $session = $_SESSION[$key]['data'];
+        $expire = $_SESSION[$key]['expire'];
 
-        if(isset($session)){
-            $rsa = new Certificate($this->config['private'],$this->config['public']);
-            $val = $rsa->privDecrypt($session);
-            return $val;
-        }else{
-            return null;
+        if ($expire==true||$expire>=time()){
+            if($session){
+                $rsa = new Certificate($this->config['private'],$this->config['public']);
+                $val = $rsa->privDecrypt($session);
+                return $val;
+            }else{
+                return null;
+            }
         }
+        return null;
     }
 
     /**
@@ -58,7 +56,14 @@ class File{
         $rsa = new Certificate($this->config['private'],$this->config['public']);
         $val = $rsa->publicEncrypt($val);
 
-        $_SESSION[$key] = $val;
+        if ($expire===true){
+
+        }else{
+            $expire = time() + $expire;
+        }
+
+        $_SESSION[$key]['expire'] = $expire;
+        $_SESSION[$key]['data'] = $val;
     }
 
     /**
@@ -97,6 +102,6 @@ class File{
      * session 生存时间
      */
     public function expire($key,$expire){
-        ini_set('session.gc_maxlifetime', $expire);
+        $_SESSION[$key]['expire'] = $expire;
     }
 }

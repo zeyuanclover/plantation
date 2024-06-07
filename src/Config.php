@@ -29,12 +29,7 @@ class Config
      */
     public static function instance($dir=null)
     {
-        if (!self::$instance) {
-            self::$instance = new Config($dir);
-            return self::$instance;
-        } else {
-            return self::$instance;
-        }
+        return new Config($dir);
     }
 
     /**
@@ -117,14 +112,5 @@ class Config
      */
     public function clearConfigData(){
         self::$__loadArr = [];
-    }
-
-    /**
-     * @param $fileName
-     * @param $data
-     * 设置缓存
-     */
-    public function set($dir,$fileName,$data){
-        Cache::instance('redis',$dir)->set();
     }
 }

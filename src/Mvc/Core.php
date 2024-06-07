@@ -39,6 +39,8 @@ class Core{
             $urlArr = explode('/',$url);
             $appName = $urlArr['1'];
             $appUrl = '/'.$urlArr['1'];
+
+            // 防止两个下划线
             if ($urlArr['1']==''){
                 $appName = 'home';
                 $appUrl = '/';
@@ -240,22 +242,26 @@ class Core{
 
                 $map = [
                     'appPath'=>$appPath,
+                    'realAppName'=>$realAppName,
                     'commonConfig' => $commonConfig,
                     'appConfig'=>$appConfig,
                     'controller'=>$controller.'Controller',
                     'action'=>$action,
-                    'currentPage'=>'',
+                    'currentPage'=>$parseUrlArr['path'],
                     'currentUri'=>$uri,
                 ];
 
                 // 配置
                 $_SERVER['appConfig'] = $appConfig;
+                $_SERVER['env'] = $env;
 
+                // 前置操作
                 $appRouteBeforePath = $appPath . 'Route' . DIRECTORY_SEPARATOR .'Before.php';
                 if(is_file($appRouteBeforePath)){
                     include($appRouteBeforePath);
                 }
 
+                // 定位控制器
                 if($controller['0']=='\\'){
                     $app = $controller;
                 }else{
@@ -270,6 +276,7 @@ class Core{
                     ]);
                 }
 
+                // 初始化控制器
                 $instance = new $app($map,$container);
 
                 // 方法是否存在
@@ -282,8 +289,22 @@ class Core{
                 }
 
                 // 载入functions
+                $directory = ROOT_PATH . 'vendor' . DIRECTORY_SEPARATOR . 'plantation' . DIRECTORY_SEPARATOR . 'clover' . DIRECTORY_SEPARATOR  . 'src' .  DIRECTORY_SEPARATOR . 'Functions'; // 替换为你的目录路径
+
+                // 读取目录内容
+                $files = scandir($directory);
+
+                // 过滤掉当前目录(.)和上级目录(..)
+                $files = array_diff($files, array('.', '..'));
+
+                // 打印文件列表
+                foreach ($files as $file) {
+                    include $directory . DIRECTORY_SEPARATOR . $file;
+                }
 
                 $instance->$action($vars);
+
+                // 后置操作
                 $appRouteAfterPath = $appPath . 'Route' . DIRECTORY_SEPARATOR .'After.php';
                 if(is_file($appRouteAfterPath)){
                     include($appRouteAfterPath);

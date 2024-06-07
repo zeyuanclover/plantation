@@ -7,23 +7,22 @@ use Plantation\Clover\Safe\Adapter\Certificate;
 class File{
 
     protected $config;
-    protected static $instance;
 
     /**
      * 调用函数
      * @return Cookie
      */
-    public static function instance($data){
-        if (!self::$instance){
-            self::$instance = new File($data);
-            return self::$instance;
-        }else{
-            return self::$instance;
-        }
+    public static function instance($config){
+        return new File($config);
     }
 
-    public function __construct($data){
-        $this->config = $data;
+    /**
+     * File constructor.
+     * @param $config
+     * 构造函数
+     */
+    public function __construct($config){
+        $this->config = $config;
     }
 
     /**
@@ -112,6 +111,4 @@ class File{
             }
         }
     }
-
-
 }
