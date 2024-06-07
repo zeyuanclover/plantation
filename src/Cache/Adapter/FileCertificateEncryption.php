@@ -9,7 +9,8 @@ class FileCertificateEncryption
     protected static $path = null;
     protected static $obj = null;
     private static $cePath;
-    public static function instance($configs=[]){
+    public static function instance($obj,$path,$perm){
+        $configs['path'] = $path;
         if (isset($configs['path'])){
             self::$path = $configs['path'];
         }else{
@@ -26,7 +27,7 @@ class FileCertificateEncryption
             mkdir(self::$path,0777,true);
         }
 
-        self::$cePath = $configs['perm'];
+        self::$cePath = $perm;
         return self::$obj = new FileCertificateEncryption();
     }
 

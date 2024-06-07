@@ -1,16 +1,10 @@
 <?php
 namespace Plantation\Clover\Cache\Adapter;
 
-use Monolog\Handler\IFTTTHandler;
-use Peach5\Nectarine\Mvc\Cache\Adapter\File;
-use Predis\Command\Redis\CONFIG;
-use function Peach5\Nectarine\Functions\report_message;
-use function Peach5\Nectarine\Functions\searchKeyInArray;
-use function Peach5\Nectarine\Functions\getFinalConfig;
-use Peach5\Nectarine\Security\Certificate;
+use Plantation\Clover\Safe\Adapter\Certificate;
 
 // cookie 类
-class Redis{
+class RedisCertificateEncription{
 
     protected $redis;
     private $path;
@@ -20,8 +14,8 @@ class Redis{
      * 调用函数
      * @return Cookie
      */
-    public static function instance($instance){
-        return new Redis($instance);
+    public static function instance($instance,$path){
+        new RedisCertificateEncription($instance,$path);
     }
 
     /**
@@ -29,8 +23,9 @@ class Redis{
      * @param $instance
      * 构造函数
      */
-    public function __construct($instance){
+    public function __construct($instance,$path){
         $this->redis = $instance;
+        $this->path = $path;
     }
 
     /**
@@ -39,7 +34,15 @@ class Redis{
      * @return mixed|null
      */
     public function get($key){
-        return $this->redis->get($key);
+        $value = $this->redis->get($key);
+
+        if(isset($value)){
+            $cert = new Certificate(ROOT_PATH.$this->path['private'],ROOT_PATH.$this->path['public']);
+            $val = $cert->privDecrypt($value);
+            return $val;
+        }else{
+            return null;
+        }
     }
 
     /**
@@ -54,6 +57,8 @@ class Redis{
             $val = json_encode($val);
         }
 
+        $cert = new Certificate(ROOT_PATH.$this->path['private'],ROOT_PATH.$this->path['public']);
+        $val = $cert->publicEncrypt($val);
         if ($expire>0){
             $this->redis->set($key,$val);
             return $this->redis->expire($key,$expire);
@@ -88,7 +93,7 @@ class Redis{
      * @return void
      */
     public function clear(){
-        $this->redis->flushdb();
+        return $this->redis->flushdb();
     }
 
     /**

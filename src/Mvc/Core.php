@@ -1,6 +1,7 @@
 <?php
 namespace Plantation\Clover\Mvc;
 
+use DI\Definition\Resolver\ParameterResolver;
 use Plantation\Clover\Cache;
 use Plantation\Clover\Message;
 use Plantation\Clover\Request;
@@ -69,6 +70,15 @@ class Core{
             $whoops = new \Whoops\Run;
             $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
             $whoops->register();
+        }else{
+            error_reporting(0);
+        }
+
+        /**
+         * 时区设置
+         */
+        if ($env['TimeZone']){
+            date_default_timezone_set($env['TimeZone']);
         }
 
         /**
@@ -76,15 +86,17 @@ class Core{
          */
         if ($env['Cache']==true){
             $commonConfigPath = ROOT_PATH .'Application' . DIRECTORY_SEPARATOR . 'Config';
+            $commonConfigCachePath = ROOT_PATH .'Run' . DIRECTORY_SEPARATOR . 'Cache';
 
-            $commonConfigCache = Cache::instance( File::instance($commonConfigPath),$commonConfigPath)->get('CommonConfig');
+            $commonConfigCache = Cache::instance( File::instance('',$commonConfigCachePath))->get('CommonConfig');
+
             if ($commonConfigCache){
                 $commonConfig = $commonConfigCache;
                 $commonConfigCache = null;
             }else{
                 $commonConfig = Config::instance( $commonConfigPath)->scanAll(true);
-                Config::instance($commonConfigPath)->clearConfigData();
-                Cache::instance( File::instance($commonConfigPath),$commonConfigPath)->set('CommonConfig',$commonConfig);
+                Config::instance()->clearConfigData();
+                Cache::instance( File::instance('',$commonConfigCachePath))->set('CommonConfig',$commonConfig);
             }
 
             /**
@@ -112,20 +124,21 @@ class Core{
             /**
              * app 专用配置
              */
+            $appConfigCachePath = ROOT_PATH .'Run' . DIRECTORY_SEPARATOR . 'Cache' .DIRECTORY_SEPARATOR. 'Application';
+            $appConfigCache = Cache::instance( File::instance('',$appConfigCachePath))->get('AppConfig');
 
-            $appConfigCache = Cache::instance( File::instance($commonConfigPath),$commonConfigPath)->get('AppConfig');
             if ($appConfigCache){
                 $appConfig = $appConfigCache;
             }else{
                 $appConfigPath = ROOT_PATH .'Application' . DIRECTORY_SEPARATOR . 'Src' . DIRECTORY_SEPARATOR .  $appName . DIRECTORY_SEPARATOR . 'Config';
                 $appConfig = Config::instance( $appConfigPath)->scanAll(true, $appConfigPath);
-                Config::instance($commonConfigPath)->clearConfigData();
-                Cache::instance( File::instance($commonConfigPath),$commonConfigPath)->set('AppConfig',$appConfig);
+                Config::instance()->clearConfigData();
+                Cache::instance( File::instance('',$appConfigCachePath))->set('AppConfig',$appConfig);
             }
         }else{
             $commonConfigPath = ROOT_PATH .'Application' . DIRECTORY_SEPARATOR . 'Config';
             $commonConfig = Config::instance( $commonConfigPath)->scanAll(true);
-            Config::instance($commonConfigPath)->clearConfigData();
+            Config::instance()->clearConfigData();
 
             /**
              * 销毁变量
@@ -155,6 +168,7 @@ class Core{
              */
             $appConfigPath = ROOT_PATH .'Application' . DIRECTORY_SEPARATOR . 'Src' . DIRECTORY_SEPARATOR .  $appName . DIRECTORY_SEPARATOR . 'Config';
             $appConfig = Config::instance( $appConfigPath)->scanAll(true, $appConfigPath);
+            Config::instance()->clearConfigData();
         }
 
         /**
@@ -165,8 +179,6 @@ class Core{
         $container = null;
         if (is_file($appCotainerPath)){
             $container = include($appCotainerPath);
-        }else{
-
         }
 
         /**
@@ -236,6 +248,9 @@ class Core{
                     'currentUri'=>$uri,
                 ];
 
+                // 配置
+                $_SERVER['appConfig'] = $appConfig;
+
                 $appRouteBeforePath = $appPath . 'Route' . DIRECTORY_SEPARATOR .'Before.php';
                 if(is_file($appRouteBeforePath)){
                     include($appRouteBeforePath);
@@ -266,6 +281,8 @@ class Core{
                     ]);
                 }
 
+                // 载入functions
+
                 $instance->$action($vars);
                 $appRouteAfterPath = $appPath . 'Route' . DIRECTORY_SEPARATOR .'After.php';
                 if(is_file($appRouteAfterPath)){
@@ -274,6 +291,4 @@ class Core{
                 break;
         }
     }
-
-
 }

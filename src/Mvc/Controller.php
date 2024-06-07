@@ -51,9 +51,23 @@ class Controller{
         include ($templateFunctionPath);
 
         $config['path'] = $this->config['appPath'];
-        extract($this->vars);
+        if (is_array($this->vars)){
+            extract($this->vars);
+        }
 
+        header("Content-type: text/html; charset=utf-8");
         include (new Template($config))->fetch($name);
+    }
+
+    /**
+     * @param $name
+     * @param $var
+     * @return mixed
+     * 访问未定义对象
+     *
+     */
+    public function __call($name,$var){
+        return $this->container->get($name);
     }
 
 }

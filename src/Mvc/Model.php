@@ -24,4 +24,12 @@ class Model{
     public function model(){
         return $this->instance;
     }
+
+    /**
+     * @return mixed
+     * db
+     */
+    public function db(){
+        return $this->instance;
+    }
 }

@@ -15,12 +15,9 @@ class Cache
      * @param $dir
      * 构造函数
      */
-    public function __construct($adapter,$dir=null)
+    public function __construct($adapter)
     {
-        $this->dir = $dir;
-        if (!$this->adapter){
-            $this->adapter = $adapter;
-        }
+        $this->adapter = $adapter;
     }
 
     /**
@@ -28,14 +25,9 @@ class Cache
      * @return Config
      * 实例化
      */
-    public static function instance($adapter,$dir=null)
+    public static function instance($adapter)
     {
-        if (!self::$instance) {
-            self::$instance = new Cache($adapter,$dir);
-            return self::$instance;
-        } else {
-            return self::$instance;
-        }
+        return self::$instance = new Cache($adapter);
     }
 
     /**

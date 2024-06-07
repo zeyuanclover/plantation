@@ -7,7 +7,8 @@ class File
     protected static $path = null;
     protected static $instance;
     protected static $obj = null;
-    public static function instance($configs=[]){
+    public static function instance($instance,$path){
+        $configs['path'] = $path;
         if (isset($configs['path'])){
             self::$path = $configs['path'];
         }else{
@@ -22,13 +23,7 @@ class File
         if (!is_dir(self::$path)){
             mkdir(self::$path,0777,true);
         }
-        if (!self::$instance) {
-            self::$instance = new File();
-            return self::$instance;
-        }else{
-            return self::$instance;
-        }
-
+        return new File();
     }
 
     // 获取缓存

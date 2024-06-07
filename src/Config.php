@@ -27,7 +27,7 @@ class Config
      * @return Config
      * 实例化
      */
-    public static function instance($dir)
+    public static function instance($dir=null)
     {
         if (!self::$instance) {
             self::$instance = new Config($dir);
