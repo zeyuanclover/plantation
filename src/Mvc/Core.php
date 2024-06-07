@@ -8,6 +8,7 @@ use Plantation\Clover\Request;
 use Plantation\Clover\Config;
 
 use Plantation\Clover\Cache\Adapter\File;
+use Plantation\Clover\File as pFile;
 use Plantation\Clover\Cache\Adapter\FileCertificateEncryption;
 
 class Core{
@@ -169,7 +170,7 @@ class Core{
              * app 专用配置
              */
             $appConfigPath = ROOT_PATH .'Application' . DIRECTORY_SEPARATOR . 'Src' . DIRECTORY_SEPARATOR .  $appName . DIRECTORY_SEPARATOR . 'Config';
-            $appConfig = Config::instance( $appConfigPath)->scanAll(true, $appConfigPath);
+            $appConfig = Config::instance( $appConfigPath)->scanAll(true);
             Config::instance()->clearConfigData();
         }
 
@@ -288,20 +289,39 @@ class Core{
                     ]);
                 }
 
-                // 载入functions
-                $directory = ROOT_PATH . 'vendor' . DIRECTORY_SEPARATOR . 'plantation' . DIRECTORY_SEPARATOR . 'clover' . DIRECTORY_SEPARATOR  . 'src' .  DIRECTORY_SEPARATOR . 'Functions'; // 替换为你的目录路径
+                // 核心函数载入
+                $coreFunctionPath = ROOT_PATH . 'vendor' . DIRECTORY_SEPARATOR . 'plantation' . DIRECTORY_SEPARATOR . 'clover' . DIRECTORY_SEPARATOR  . 'src' .  DIRECTORY_SEPARATOR . 'Functions'; // 替换为你的目录路径
+                $coreFunctionCachePath = ROOT_PATH .'Run' . DIRECTORY_SEPARATOR . 'Cache' .DIRECTORY_SEPARATOR. 'functions';
+                if ($env['Cache']==true){
+                    // 载入functions
+                    $corefunctionCache = Cache::instance( File::instance('',$coreFunctionCachePath))->get('coreFunction');
 
-                // 读取目录内容
-                $files = scandir($directory);
+                    if ($corefunctionCache){
+                    }else{
+                        if (!is_dir($coreFunctionPath)){
+                            $corefunctionCache = [];
+                        }else{
+                            $corefunctionCache = $coreFunctionCacheArr = pFile::instance($coreFunctionPath)->scanfiles();
 
-                // 过滤掉当前目录(.)和上级目录(..)
-                $files = array_diff($files, array('.', '..'));
+                            $files = null;
+                            $coreFunctionPath = null;
 
-                // 打印文件列表
-                foreach ($files as $file) {
-                    include $directory . DIRECTORY_SEPARATOR . $file;
+                            Cache::instance( File::instance('',$coreFunctionCachePath))->set('coreFunction',$coreFunctionCacheArr);
+                            $coreFunctionCacheArr = null;
+                        }
+                    }
+                }else{
+                    $corefunctionCache = pFile::instance($coreFunctionPath)->scanfiles();
                 }
 
+                // 载入核心function
+                foreach ($corefunctionCache as $coreFunctionFile){
+                    if(is_file($coreFunctionFile)){
+                        include $coreFunctionFile;
+                    }
+                }
+
+                // 调用控制器方法
                 $instance->$action($vars);
 
                 // 后置操作

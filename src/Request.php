@@ -24,6 +24,24 @@ class Request
     }
 
     /**
+     * @return bool
+     * 是否https
+     */
+    function isHttps() {
+        if ((isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on')) {
+            return true;
+        } elseif (isset($_SERVER['REQUEST_SCHEME']) && strtolower($_SERVER['REQUEST_SCHEME']) == 'https') {
+            return true;
+        } elseif (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) == 'https') {
+            return true;
+        } elseif (isset($_SERVER['HTTP_X_CLIENT_SCHEME']) && strtolower($_SERVER['HTTP_X_CLIENT_SCHEME']) == 'https') {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * @param null $name
      * @return array
      * 获取get方法提交参数
@@ -61,6 +79,26 @@ class Request
             }else{
                 return null;
             }
+        }
+    }
+
+    /**
+     * @param null $name
+     * @return array|mixed|null
+     * request
+     */
+    public function request($name=null){
+
+        // 返回所有
+        if (!$name){
+            return $_REQUEST;
+        }
+
+        // 返回某一个
+        if (isset($_REQUEST[$name])){
+            return $_REQUEST[$name];
+        }else{
+            return null;
         }
     }
 
