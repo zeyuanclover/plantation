@@ -103,4 +103,13 @@ class RedisCertificateEncription{
     public function expire($key,$expire){
         return $this->redis->expire($key,$expire);
     }
+
+    /**
+     * @param $key
+     * @return mixed
+     * 有效期
+     */
+    public function ttl($key){
+        return $this->redis->ttl($key);
+    }
 }

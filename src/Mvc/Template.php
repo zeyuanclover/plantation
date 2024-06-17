@@ -31,6 +31,11 @@ class Template{
      * 查找模板文件位置
      */
     public function fetch($name){
+        $name = str_replace('/',DIRECTORY_SEPARATOR,$name);
+        if ($name[0]==DIRECTORY_SEPARATOR){
+            $name = substr($name,1);
+        }
+
         $path = $this->path . DIRECTORY_SEPARATOR . $name;
         if(!is_file($path)){
             Message::instance('json')->send([

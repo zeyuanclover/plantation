@@ -22,7 +22,11 @@ class File
             mkdir($dirName, 0777, true);
         }
 
-        $this->dirName = $dirName;
+        if(substr($dirName,strlen($dirName)-1)==DIRECTORY_SEPARATOR){
+            $this->dirName = substr($dirName,0,-1);
+        }else{
+            $this->dirName = $dirName;
+        }
     }
 
     /**
@@ -58,9 +62,9 @@ class File
      * @param unknown $dir
      * @return multitype:|multitype:string
      */
-    function scanfiles()
+    function scanfiles($name=null)
     {
-        $dir = $this->dirName;
+        $dir = $this->dirName . DIRECTORY_SEPARATOR . $name;
         if (!is_dir($dir))
             return array();
 
@@ -72,7 +76,6 @@ class File
 
         // 放置所有文件的容器
         $rt = array();
-
         do {
             // 弹栈
             $dir = array_pop($dirs);
@@ -96,15 +99,15 @@ class File
                 }
             }
         } while ($dirs); // 直到栈中没有目录
-
         return $rt;
     }
 
-    // 删除目录下所有文件
+    /**
+     * @param string $dir
+     * 删除目录下所有文件
+     */
     function deleteDirectory($dir='') {
-        if(!$dir){
-            $dir = $this->dirName;
-        }
+        $dir = $this->dirName . DIRECTORY_SEPARATOR . $dir;
         if (is_dir($dir)) {
             $objects = scandir($dir);
             foreach ($objects as $object) {

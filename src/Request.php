@@ -24,6 +24,44 @@ class Request
     }
 
     /**
+     * @param $url
+     * @return mixed|string|null
+     * 获取子域名
+     */
+    function getSubdomain() {
+        $url = $this->getUrl();
+        $parsedUrl = parse_url($url);
+        $hostParts = explode('.', $parsedUrl['host']);
+        if (count($hostParts) < 3) {
+            return null; // 不是子域名
+        }
+        return $hostParts[0]; // 子域名是第一部分
+    }
+
+    /**
+     * @return mixed|string
+     * 获取用户真实ip
+     */
+    function getUserRealIP() {
+        $headers = array(
+            'HTTP_CLIENT_IP',
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_X_FORWARDED',
+            'HTTP_FORWARDED_FOR',
+            'HTTP_FORWARDED',
+            'REMOTE_ADDR'
+        );
+
+        foreach ($headers as $header) {
+            if (isset($_SERVER[$header]) && filter_var($_SERVER[$header], FILTER_VALIDATE_IP)) {
+                return $_SERVER[$header];
+            }
+        }
+
+        return 'UNKNOWN';
+    }
+
+    /**
      * @return bool
      * 是否https
      */
@@ -120,6 +158,26 @@ class Request
         }else{
             return null;
         }
+    }
+
+    /**
+     * @param $url
+     * @return string
+     * 获取域名
+     */
+    public function getDomain($url){
+        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http';
+
+        // 获取主机名(包括域名和端口)
+        $host = $_SERVER['HTTP_HOST'];
+
+        $uri = '';
+        if ($url){
+            $uri = $url;
+        }
+
+        // 构建完整的URL
+        return $protocol . '://' . $host . $uri;
     }
 
     /**

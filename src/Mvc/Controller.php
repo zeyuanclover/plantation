@@ -25,6 +25,15 @@ class Controller{
     }
 
     /**
+     * @param $url
+     * @return string
+     * url
+     */
+    public function appUrl($url){
+        return $this->config['appUrl'] . $url;
+    }
+
+    /**
      * @param $name
      * @return mixed
      * 容器
@@ -51,13 +60,13 @@ class Controller{
     public function readTemplate($name,$nameAdditional=null){
         // 查找模板名称
         $config['theme'] = 'default';
-        if(isset($this->config['appConfig']['Config.Application']['theme'])){
-            $config['theme'] = $this->config['appConfig']['Config.Application']['theme'];
+        if(isset($this->config['appConfig']['Application']['theme'])){
+            $config['theme'] = $this->config['appConfig']['Application']['theme'];
         }
 
         // 载入模板函数
         $templateFunctionPath = $this->config['appPath'] . 'Template' . DIRECTORY_SEPARATOR . 'Function.php';
-        include ($templateFunctionPath);
+        include_once ($templateFunctionPath);
 
         // 分配变量
         $config['path'] = $this->config['appPath'];
@@ -71,9 +80,6 @@ class Controller{
             $nameArr = explode('.', $name);
             $finalName = implode('_' . $nameAdditional . '.',$nameArr);
         }
-
-        // html 格式
-        header("Content-type: text/html; charset=utf-8");
 
         $content = null;
 
@@ -92,13 +98,13 @@ class Controller{
     public function template($name,$cacheSwitch=false,$nameAdditional=null){
         // 查找模板名称
         $config['theme'] = 'default';
-        if(isset($this->config['appConfig']['Config.Application']['theme'])){
-            $config['theme'] = $this->config['appConfig']['Config.Application']['theme'];
+        if(isset($this->config['appConfig']['Application']['theme'])){
+            $config['theme'] = $this->config['appConfig']['Application']['theme'];
         }
 
         // 载入模板函数
         $templateFunctionPath = $this->config['appPath'] . 'Template' . DIRECTORY_SEPARATOR . 'Function.php';
-        include ($templateFunctionPath);
+        include_once($templateFunctionPath);
 
         // 分配变量
         $config['path'] = $this->config['appPath'];
@@ -112,9 +118,6 @@ class Controller{
             $nameArr = explode('.', $name);
             $finalName = implode('_' . $nameAdditional . '.',$nameArr);
         }
-
-        // html 格式
-        header("Content-type: text/html; charset=utf-8");
 
         $content = null;
 

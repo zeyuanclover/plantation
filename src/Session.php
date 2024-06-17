@@ -4,64 +4,75 @@
 namespace Plantation\Clover;
 
 
+use Predis\Command\Redis\SELECT;
+
 class Session
 {
-    protected $adapter;
+    private static $instance;
+    private $dir;
+    private $adapter;
 
     /**
-     * @param $instance
-     * @return Cookie
-     * 实例化函数
-     */
-    public static function instance($instance){
-        return new Session($instance);
-    }
-
-    /**
-     * Cookie constructor.
-     * @param $adpater
+     * Config constructor.
+     * @param $dir
      * 构造函数
      */
-    public function __construct($adpater){
-        $this->adapter = $adpater;
+    public function __construct($adapter)
+    {
+        $this->adapter = $adapter;
     }
 
     /**
-     * @param $key
+     * @param $dir
+     * @return Config
+     * 实例化
+     */
+    public static function instance($adapter)
+    {
+        return new Session($adapter);
+    }
+
+    /**
+     * @param $name
+     * @return mixed
+     * 设置
+     */
+    public function get($name){
+        return $this->adapter->get($name);
+    }
+
+    /**
+     * @param $name
      * @param $data
-     * @param null $config
-     * @return mixed
-     * 设置cookie
+     * 设置
      */
-    public function set($key,$data,$expire=true){
-        return $this->adapter->set($key,$data,$expire);
+    public function set($name,$data,$expire=0){
+        $this->adapter->set($name,$data,$expire);
     }
 
     /**
-     * @param $key
-     * @return mixed
-     * 获取cookie
-     */
-    public function get($key){
-        return $this->adapter->get($key);
-    }
-
-    /**
-     * @param $key
-     * @return mixed
-     * 删除cookie
-     */
-    public function delete($key){
-        return $this->adapter->delete($key);
-    }
-
-    /**
-     * @param $key
+     * @param $name
      * @param $expire
-     * @return mixed
      * 设置有效期
      */
-    public function expire($key,$expire){
-        return $this->adapter->expire($key,$expire);
+    public function expire($name,$expire){
+        $this->adapter->expire($name,$expire);
+    }
+
+    /**
+     * @param $name
+     * 删除
+     */
+    public function delete($name){
+        $this->adapter->delete($name);
+    }
+
+    /**
+     * @param $key
+     * @return mixed
+     * 有效期
+     */
+    public function ttl($key){
+        return $this->adapter->ttl($key);
     }
 }

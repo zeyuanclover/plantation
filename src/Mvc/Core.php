@@ -14,6 +14,8 @@ use Plantation\Clover\Cache\Adapter\FileCertificateEncryption;
 class Core{
     public function run(){
 
+        session_start();
+
         /**
          * 确认应用，找到具体应用目录，检查环境
          */
@@ -97,8 +99,8 @@ class Core{
                 $commonConfig = $commonConfigCache;
                 $commonConfigCache = null;
             }else{
-                $commonConfig = Config::instance( $commonConfigPath)->scanAll(true);
-                Config::instance()->clearConfigData();
+                $commonConfig = Config::instance( $commonConfigPath)->scanFiles();
+                $commonConfig = Config::instance()->pathsToTree($commonConfig);
                 Cache::instance( File::instance('',$commonConfigCachePath))->set('CommonConfig',$commonConfig);
             }
 
@@ -108,7 +110,7 @@ class Core{
             $commonConfigPath = null;
             $appConfigPath = null;
 
-            if(!isset($commonConfig['Config.Application'])||!isset($commonConfig['Config.Application']['app'])){
+            if(!isset($commonConfig['Application'])||!isset($commonConfig['Application']['app'])){
                 Message::instance('json')->send([
                     'message'=>'Line ['.__LINE__.'] -文件'.__FILE__.'-请配置Application.php！',
                     'code'=>'File-1001',
@@ -116,32 +118,42 @@ class Core{
                 ]);
             }
 
-            $appCommonConfig = $commonConfig['Config.Application'];
-            $realAppName = null;
-            if (isset($appCommonConfig['app'][$appUrl]['name'])){
-                $realAppName = $appCommonConfig['app'][$appUrl]['name'];
+            // 获取真实模块名称
+            $commonConfig = $commonConfig['Application'];
+            if (isset($commonConfig['app'][$appUrl]['name'])){
+                $realAppName = $commonConfig['app'][$appUrl]['name'];
             }else{
-                $realAppName = $appCommonConfig['appDefault'];
+                // 绑定二级域名
+                $subDomain = Request::instance()->getSubdomain();
+                if($subDomain){
+                    if (isset($commonConfig['subdomain'][$subDomain])) {
+                        $realAppName = $commonConfig['subdomain'][$subDomain];
+                    }else{
+                        $realAppName = $commonConfig['appDefault'];
+                    }
+                }else{
+                    $realAppName = $commonConfig['appDefault'];
+                }
             }
 
             /**
              * app 专用配置
              */
-            $appConfigCachePath = ROOT_PATH .'Run' . DIRECTORY_SEPARATOR . 'Cache' .DIRECTORY_SEPARATOR. 'Application';
+            $appConfigCachePath = ROOT_PATH .'Run' . DIRECTORY_SEPARATOR . 'Cache' .DIRECTORY_SEPARATOR. 'Application' . DIRECTORY_SEPARATOR . $realAppName;
             $appConfigCache = Cache::instance( File::instance('',$appConfigCachePath))->get('AppConfig');
 
             if ($appConfigCache){
                 $appConfig = $appConfigCache;
             }else{
                 $appConfigPath = ROOT_PATH .'Application' . DIRECTORY_SEPARATOR . 'Src' . DIRECTORY_SEPARATOR .  $appName . DIRECTORY_SEPARATOR . 'Config';
-                $appConfig = Config::instance( $appConfigPath)->scanAll(true, $appConfigPath);
-                Config::instance()->clearConfigData();
+                $appConfig = Config::instance( $appConfigPath)->scanFiles();
+                $appConfig = Config::instance()->pathsToTree($appConfig);
                 Cache::instance( File::instance('',$appConfigCachePath))->set('AppConfig',$appConfig);
             }
         }else{
             $commonConfigPath = ROOT_PATH .'Application' . DIRECTORY_SEPARATOR . 'Config';
-            $commonConfig = Config::instance( $commonConfigPath)->scanAll(true);
-            Config::instance()->clearConfigData();
+            $commonConfig = Config::instance( $commonConfigPath)->scanFiles();
+            $commonConfig = Config::instance()->pathsToTree($commonConfig);
 
             /**
              * 销毁变量
@@ -149,7 +161,7 @@ class Core{
             $commonConfigPath = null;
             $appConfigPath = null;
 
-            if(!isset($commonConfig['Config.Application'])||!isset($commonConfig['Config.Application']['app'])){
+            if(!isset($commonConfig['Application'])||!isset($commonConfig['Application']['app'])){
                 Message::instance('json')->send([
                     'message'=>'Line '.__LINE__.'-文件'.__FILE__.'-请配置Application.php！',
                     'code'=>'File-1001',
@@ -157,27 +169,36 @@ class Core{
                 ]);
             }
 
-            $appCommonConfig = $commonConfig['Config.Application'];
-
-            $realAppName = null;
+            // 获取真实模块名称
+            $appCommonConfig = $commonConfig['Application'];
             if (isset($appCommonConfig['app'][$appUrl]['name'])){
                 $realAppName = $appCommonConfig['app'][$appUrl]['name'];
             }else{
-                $realAppName = $appCommonConfig['appDefault'];
+                // 绑定二级域名
+                $subDomain = Request::instance()->getSubdomain();
+                if($subDomain){
+                    if (isset($commonConfig['subdomain'][$subDomain])){
+                        $realAppName = $commonConfig['subdomain'][$subDomain];
+                    }else{
+                        $realAppName = $appCommonConfig['appDefault'];
+                    }
+                }else{
+                    $realAppName = $appCommonConfig['appDefault'];
+                }
             }
 
             /**
              * app 专用配置
              */
-            $appConfigPath = ROOT_PATH .'Application' . DIRECTORY_SEPARATOR . 'Src' . DIRECTORY_SEPARATOR .  $appName . DIRECTORY_SEPARATOR . 'Config';
-            $appConfig = Config::instance( $appConfigPath)->scanAll(true);
-            Config::instance()->clearConfigData();
+            $appConfigPath = ROOT_PATH .'Application' . DIRECTORY_SEPARATOR . 'Src' . DIRECTORY_SEPARATOR .  $appName . DIRECTORY_SEPARATOR . 'Config' .DIRECTORY_SEPARATOR . $realAppName;
+            $appConfig = Config::instance( $appConfigPath)->scanFiles();
+            $appConfig = Config::instance()->pathsToTree($appConfig);
         }
 
         /**
          * 载入容器
          */
-        $appCotainerPath = ROOT_PATH .'Application' . DIRECTORY_SEPARATOR . 'Src' . DIRECTORY_SEPARATOR .  $appName . DIRECTORY_SEPARATOR . 'Container' .DIRECTORY_SEPARATOR . 'Container.php';
+        $appCotainerPath = ROOT_PATH .'Application' . DIRECTORY_SEPARATOR . 'Src' . DIRECTORY_SEPARATOR .  $realAppName . DIRECTORY_SEPARATOR . 'Container' .DIRECTORY_SEPARATOR . 'Container.php';
 
         $container = null;
         if (is_file($appCotainerPath)){
@@ -248,6 +269,7 @@ class Core{
                     'appConfig'=>$appConfig,
                     'controller'=>$controller.'Controller',
                     'action'=>$action,
+                    'appUrl'=>$appUrl,
                     'currentPage'=>$parseUrlArr['path'],
                     'currentUri'=>$uri,
                 ];
@@ -266,7 +288,7 @@ class Core{
                 if($controller['0']=='\\'){
                     $app = $controller;
                 }else{
-                    $app = '\\Application\\'.$appName.'\\Controller\\'.ucfirst($controller).'Controller';
+                    $app = '\\Application\\'.$realAppName.'\\Controller\\'.ucfirst($controller).'Controller';
                 }
 
                 if(!class_exists($app)){
