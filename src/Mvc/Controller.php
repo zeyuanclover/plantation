@@ -84,7 +84,7 @@ class Controller{
         $content = null;
 
         ob_start();
-        include (new Template($config))->fetch($name);
+        include_once (new Template($config))->fetch($name);
         $content = ob_get_clean();
         return $content;
     }
@@ -176,6 +176,27 @@ class Controller{
             }
         }
         File::instance('',$filePath)->set($name,$content);
+    }
+
+    /**
+     * @param $name
+     * @param $content
+     * @return mixed|null
+     * 获取缓存
+     */
+    public function getPacheCache($name,$content){
+        $filePath = ROOT_PATH . 'Run' . DIRECTORY_SEPARATOR . 'PageCache' . DIRECTORY_SEPARATOR . $this->config['realAppName'] . DIRECTORY_SEPARATOR . $this->config['controller'] . DIRECTORY_SEPARATOR . $this->config['action'];
+        if (strpos($name,DIRECTORY_SEPARATOR)!==false||strpos($name,'/')!==false){
+            $dir = str_replace('/',DIRECTORY_SEPARATOR,$name);
+            $dirArr = explode(DIRECTORY_SEPARATOR,$dir);
+            if (count($dirArr)>2){
+                unset($dirArr[count($dirArr)-1]);
+            }
+            if (!is_dir($filePath.DIRECTORY_SEPARATOR.implode(DIRECTORY_SEPARATOR,$dirArr))){
+                mkdir($filePath.DIRECTORY_SEPARATOR.implode(DIRECTORY_SEPARATOR,$dirArr),0777,true);
+            }
+        }
+        return File::instance('',$filePath)->get($name);
     }
 
     /**

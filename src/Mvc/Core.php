@@ -12,7 +12,7 @@ use Plantation\Clover\File as pFile;
 use Plantation\Clover\Cache\Adapter\FileCertificateEncryption;
 
 class Core{
-    public function run(){
+    public function run($myAppName=''){
 
         session_start();
 
@@ -52,7 +52,7 @@ class Core{
 
         $urlArr = null;
         $appName = ucfirst($appName);
-
+     
         /**
          * env 载入
          */
@@ -136,6 +136,13 @@ class Core{
                 }
             }
 
+            // 指定的app
+            if ($myAppName){
+                if (isset($commonConfig['app'][$myAppName]['name'])){
+                    $realAppName = $commonConfig['app'][$myAppName]['name'];
+                }
+            }
+
             /**
              * app 专用配置
              */
@@ -184,6 +191,13 @@ class Core{
                     }
                 }else{
                     $realAppName = $appCommonConfig['appDefault'];
+                }
+            }
+
+            // 指定的app
+            if ($myAppName){
+                if (isset($commonConfig['app'][$myAppName]['name'])){
+                    $realAppName = $commonConfig['app'][$myAppName]['name'];
                 }
             }
 
