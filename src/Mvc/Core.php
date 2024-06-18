@@ -52,7 +52,7 @@ class Core{
 
         $urlArr = null;
         $appName = ucfirst($appName);
-     
+
         /**
          * env 载入
          */
@@ -67,6 +67,8 @@ class Core{
                 'error'=>false
             ]);
         }
+
+        $envPath = null;
 
         /**
          * 报错信息
@@ -109,6 +111,7 @@ class Core{
              */
             $commonConfigPath = null;
             $appConfigPath = null;
+            $commonConfigCachePath = null;
 
             if(!isset($commonConfig['Application'])||!isset($commonConfig['Application']['app'])){
                 Message::instance('json')->send([
@@ -151,12 +154,15 @@ class Core{
 
             if ($appConfigCache){
                 $appConfig = $appConfigCache;
+                $appConfigCache = null;
             }else{
                 $appConfigPath = ROOT_PATH .'Application' . DIRECTORY_SEPARATOR . 'Src' . DIRECTORY_SEPARATOR .  $appName . DIRECTORY_SEPARATOR . 'Config';
                 $appConfig = Config::instance( $appConfigPath)->scanFiles();
                 $appConfig = Config::instance()->pathsToTree($appConfig);
                 Cache::instance( File::instance('',$appConfigCachePath))->set('AppConfig',$appConfig);
             }
+            $appConfigCache = null;
+            $appConfigCachePath = null;
         }else{
             $commonConfigPath = ROOT_PATH .'Application' . DIRECTORY_SEPARATOR . 'Config';
             $commonConfig = Config::instance( $commonConfigPath)->scanFiles();
@@ -167,6 +173,7 @@ class Core{
              */
             $commonConfigPath = null;
             $appConfigPath = null;
+            $appConfigCachePath = null;
 
             if(!isset($commonConfig['Application'])||!isset($commonConfig['Application']['app'])){
                 Message::instance('json')->send([
@@ -207,6 +214,7 @@ class Core{
             $appConfigPath = ROOT_PATH .'Application' . DIRECTORY_SEPARATOR . 'Src' . DIRECTORY_SEPARATOR .  $appName . DIRECTORY_SEPARATOR . 'Config' .DIRECTORY_SEPARATOR . $realAppName;
             $appConfig = Config::instance( $appConfigPath)->scanFiles();
             $appConfig = Config::instance()->pathsToTree($appConfig);
+            $appConfigPath = null;
         }
 
         /**
@@ -218,6 +226,8 @@ class Core{
         if (is_file($appCotainerPath)){
             $container = include($appCotainerPath);
         }
+
+        $appCotainerPath = null;
 
         /**
          * 路由
@@ -235,6 +245,7 @@ class Core{
             $dispatcher = include $appRoutePath;
         }
 
+        $appRoutePath = null;
         define('APP_PATH',$appPath);
 
         // Fetch method and URI from somewhere
@@ -286,10 +297,11 @@ class Core{
                     'appUrl'=>$appUrl,
                     'currentPage'=>$parseUrlArr['path'],
                     'currentUri'=>$uri,
+                    'version'=>$env['Version']
                 ];
 
                 // 配置
-                $_SERVER['appConfig'] = $appConfig;
+                $_SERVER['appConfig'] = $appConfig + $commonConfig;
                 $_SERVER['env'] = $env;
 
                 // 前置操作
@@ -297,6 +309,8 @@ class Core{
                 if(is_file($appRouteBeforePath)){
                     include($appRouteBeforePath);
                 }
+
+                $appRouteBeforePath = null;
 
                 // 定位控制器
                 if($controller['0']=='\\'){
@@ -313,8 +327,16 @@ class Core{
                     ]);
                 }
 
+                $commonConfig = null;
+                $appConfig = null;
+                $appUrl = null;
+                $parseUrlArr = null;
+
                 // 初始化控制器
                 $instance = new $app($map,$container);
+
+                $container = null;
+                $map = null;
 
                 // 方法是否存在
                 if(!method_exists($instance,$action)){
@@ -350,6 +372,9 @@ class Core{
                     $corefunctionCache = pFile::instance($coreFunctionPath)->scanfiles();
                 }
 
+                $coreFunctionPath = null;
+                $coreFunctionCachePath = null;
+
                 // 载入核心function
                 foreach ($corefunctionCache as $coreFunctionFile){
                     if(is_file($coreFunctionFile)){
@@ -357,14 +382,20 @@ class Core{
                     }
                 }
 
+                $corefunctionCache = null;
+
                 // 调用控制器方法
                 $instance->$action($vars);
+
+                $vars = null;
 
                 // 后置操作
                 $appRouteAfterPath = $appPath . 'Route' . DIRECTORY_SEPARATOR .'After.php';
                 if(is_file($appRouteAfterPath)){
                     include($appRouteAfterPath);
                 }
+                $appRouteAfterPath = null;
+                $env = null;
                 break;
         }
     }
