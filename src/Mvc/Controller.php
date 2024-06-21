@@ -210,4 +210,61 @@ class Controller{
         return $this->container->get($name);
     }
 
+    /**
+     * @param $name
+     * @param false $cacheSwitch
+     * @param null $nameAdditional
+     * 控制器模板
+     */
+     public function controllerTemplate($name,$cacheSwitch=false,$nameAdditional=null){
+         // 查找模板名称
+         $config['theme'] = 'default';
+         if(isset($this->config['appConfig']['Application']['theme'])){
+             $config['theme'] = $this->config['appConfig']['Application']['theme'];
+         }
+
+         $controller = strtolower(str_replace('Controller','',$this->config['controller']));
+         if($name[strlen($nameAdditional-1)]=='/'||$name[strlen($nameAdditional-1)]=='\\'){
+             $name = $controller . $name;
+         }else{
+             $name = $controller . DIRECTORY_SEPARATOR . $name;
+         }
+
+         // 载入模板函数
+         $templateFunctionPath = $this->config['appPath'] . 'Template' . DIRECTORY_SEPARATOR . 'Function.php';
+         include_once($templateFunctionPath);
+
+         // 分配变量
+         $config['path'] = $this->config['appPath'];
+         if (is_array($this->vars)){
+             extract($this->vars);
+         }
+
+         // 遇到有变量的缓存，以此为区分
+         $finalName = $name;
+         if ($nameAdditional){
+             $nameArr = explode('.', $name);
+             $finalName = implode('_' . $nameAdditional . '.',$nameArr);
+         }
+
+         $content = null;
+
+         // 是否开启缓存
+         if($_SERVER['env']['Cache']==1&&$cacheSwitch==true){
+             $filePath = ROOT_PATH . 'Run' . DIRECTORY_SEPARATOR . 'PageCache' . DIRECTORY_SEPARATOR . $this->config['realAppName'] . DIRECTORY_SEPARATOR . $this->config['controller'] . DIRECTORY_SEPARATOR . $this->config['action'];
+             $htmlCache = File::instance('',$filePath)->get($finalName);
+
+             if ($htmlCache){
+                 echo $htmlCache;
+             }else{
+                 ob_start();
+                 include (new Template($config))->fetch($name);
+                 $content = ob_get_clean();
+                 $this->setPacheCache($finalName,$content);
+                 echo $content;
+             }
+         }else{
+             include (new Template($config))->fetch($name);
+         }
+     }
 }

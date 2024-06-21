@@ -103,6 +103,18 @@ class Core{
             }else{
                 $commonConfig = Config::instance( $commonConfigPath)->scanFiles();
                 $commonConfig = Config::instance()->pathsToTree($commonConfig);
+
+                // 获取核心版本号
+                $composerJsonPath = ROOT_PATH . 'composer.json';
+                if (is_file($composerJsonPath)){
+                    $package = json_decode(file_get_contents($composerJsonPath),true);
+                    if (isset($package['require']['plantation/clover'])){
+                        $commonConfig['version'] = 'V' . $package['require']['plantation/clover'];
+                    }
+                    $package = null;
+                }
+                $composerJsonPath = null;
+
                 Cache::instance( File::instance('',$commonConfigCachePath))->set('CommonConfig',$commonConfig);
             }
 
@@ -122,27 +134,27 @@ class Core{
             }
 
             // 获取真实模块名称
-            $commonConfig = $commonConfig['Application'];
-            if (isset($commonConfig['app'][$appUrl]['name'])){
-                $realAppName = $commonConfig['app'][$appUrl]['name'];
+            $commonAppConfig = $commonConfig['Application'];
+            if (isset($commonAppConfig['app'][$appUrl]['name'])){
+                $realAppName = $commonAppConfig['app'][$appUrl]['name'];
             }else{
                 // 绑定二级域名
                 $subDomain = Request::instance()->getSubdomain();
                 if($subDomain){
-                    if (isset($commonConfig['subdomain'][$subDomain])) {
-                        $realAppName = $commonConfig['subdomain'][$subDomain];
+                    if (isset($commonAppConfig['subdomain'][$subDomain])) {
+                        $realAppName = $commonAppConfig['subdomain'][$subDomain];
                     }else{
-                        $realAppName = $commonConfig['appDefault'];
+                        $realAppName = $commonAppConfig['appDefault'];
                     }
                 }else{
-                    $realAppName = $commonConfig['appDefault'];
+                    $realAppName = $commonAppConfig['appDefault'];
                 }
             }
 
             // 指定的app
             if ($myAppName){
-                if (isset($commonConfig['app'][$myAppName]['name'])){
-                    $realAppName = $commonConfig['app'][$myAppName]['name'];
+                if (isset($commonAppConfig['app'][$myAppName]['name'])){
+                    $realAppName = $commonAppConfig['app'][$myAppName]['name'];
                 }
             }
 
@@ -168,6 +180,17 @@ class Core{
             $commonConfig = Config::instance( $commonConfigPath)->scanFiles();
             $commonConfig = Config::instance()->pathsToTree($commonConfig);
 
+            // 获取核心版本号
+            $composerJsonPath = ROOT_PATH . 'composer.json';
+            if (is_file($composerJsonPath)){
+                $package = json_decode(file_get_contents($composerJsonPath),true);
+                if (isset($package['require']['plantation/clover'])){
+                    $commonConfig['version'] = 'V' . $package['require']['plantation/clover'];
+                }
+                $package = null;
+            }
+            $composerJsonPath = null;
+
             /**
              * 销毁变量
              */
@@ -191,8 +214,8 @@ class Core{
                 // 绑定二级域名
                 $subDomain = Request::instance()->getSubdomain();
                 if($subDomain){
-                    if (isset($commonConfig['subdomain'][$subDomain])){
-                        $realAppName = $commonConfig['subdomain'][$subDomain];
+                    if (isset($appCommonConfig['subdomain'][$subDomain])){
+                        $realAppName = $appCommonConfig['subdomain'][$subDomain];
                     }else{
                         $realAppName = $appCommonConfig['appDefault'];
                     }
@@ -211,7 +234,7 @@ class Core{
             /**
              * app 专用配置
              */
-            $appConfigPath = ROOT_PATH .'Application' . DIRECTORY_SEPARATOR . 'Src' . DIRECTORY_SEPARATOR .  $appName . DIRECTORY_SEPARATOR . 'Config' .DIRECTORY_SEPARATOR . $realAppName;
+            $appConfigPath = ROOT_PATH .'Application' . DIRECTORY_SEPARATOR . 'Src' . DIRECTORY_SEPARATOR .  $realAppName . DIRECTORY_SEPARATOR . 'Config';
             $appConfig = Config::instance( $appConfigPath)->scanFiles();
             $appConfig = Config::instance()->pathsToTree($appConfig);
             $appConfigPath = null;
