@@ -49,7 +49,7 @@ class Message
      * @param $data
      * 发送消息
      */
-    public function send($data){
-        $this->adapterInstance->send($data);
+    public function send($data,$die=true){
+        $this->adapterInstance->send($data,$die);
     }
 }

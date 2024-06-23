@@ -240,6 +240,15 @@ class Core{
             $appConfigPath = null;
         }
 
+        // mysql 主数据库
+        define('MASTER_MYSQL',[
+            'host'=>$appConfig['DataBase']['Db'][0]['host'],
+            'db'=>$appConfig['DataBase']['Db'][0]['db'],
+            'username'=>$appConfig['DataBase']['Db'][0]['username'],
+            'prefix'=>$appConfig['DataBase']['Db'][0]['prefix'],
+            'password'=>$appConfig['DataBase']['Db'][0]['password'],
+        ]);
+
         /**
          * 载入容器
          */
@@ -320,7 +329,8 @@ class Core{
                     'appUrl'=>$appUrl,
                     'currentPage'=>$parseUrlArr['path'],
                     'currentUri'=>$uri,
-                    'version'=>$env['Version']
+                    'version'=>$env['Version'],
+                    'env'=>$env
                 ];
 
                 // 配置

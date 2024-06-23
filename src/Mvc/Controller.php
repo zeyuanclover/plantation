@@ -30,6 +30,7 @@ class Controller{
      * url
      */
     public function appUrl($url){
+        $url = str_replace($this->config['appUrl'],'',$url);
         return $this->config['appUrl'] . $url;
     }
 
