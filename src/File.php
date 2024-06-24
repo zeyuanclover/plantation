@@ -16,16 +16,18 @@ class File
      * @param $dirName
      * 构造函数
      */
-    public function __construct($dirName)
+    public function __construct($dirName=null)
     {
-        if (!is_dir($dirName)) {
-            mkdir($dirName, 0777, true);
-        }
+        if ($dirName){
+            if (!is_dir($dirName)) {
+                mkdir($dirName, 0777, true);
+            }
 
-        if(substr($dirName,strlen($dirName)-1)==DIRECTORY_SEPARATOR){
-            $this->dirName = substr($dirName,0,-1);
-        }else{
-            $this->dirName = $dirName;
+            if(substr($dirName,strlen($dirName)-1)==DIRECTORY_SEPARATOR){
+                $this->dirName = substr($dirName,0,-1);
+            }else{
+                $this->dirName = $dirName;
+            }
         }
     }
 
@@ -34,7 +36,7 @@ class File
      * @return File
      * 加载函数
      */
-    public static function instance($dirName)
+    public static function instance($dirName=null)
     {
        return new File($dirName);
     }
@@ -106,8 +108,8 @@ class File
      * @param string $dir
      * 删除目录下所有文件
      */
-    function deleteDirectory($dir='') {
-        $dir = $this->dirName . DIRECTORY_SEPARATOR . $dir;
+    function deleteDirectory() {
+        $dir = $this->dirName . DIRECTORY_SEPARATOR;
         if (is_dir($dir)) {
             $objects = scandir($dir);
             foreach ($objects as $object) {
@@ -121,5 +123,31 @@ class File
             }
             rmdir($dir);
         }
+    }
+
+    /**
+     * @param $dirPath
+     * 删除文件夹下所有文件
+     */
+    function deleteDir($dirPath=null) {
+        if (!is_dir($dirPath)) {
+            if(is_dir($this->dirName)){
+                $dirPath = $this->dirName;
+            }else{
+                return false;
+            }
+        }
+        if (substr($dirPath, strlen($dirPath) - 1, 1) != '/') {
+            $dirPath .= '/';
+        }
+        $files = glob($dirPath . '*', GLOB_MARK);
+        foreach ($files as $file) {
+            if (is_dir($file)) {
+                $this->deleteDir($file);
+            } else {
+                unlink($file);
+            }
+        }
+        rmdir($dirPath);
     }
 }
