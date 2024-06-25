@@ -109,10 +109,11 @@ class Core{
                 if (is_file($composerJsonPath)){
                     $package = json_decode(file_get_contents($composerJsonPath),true);
                     if (isset($package['require']['plantation/clover'])){
-                        $commonConfig['version'] = 'V' . $package['require']['plantation/clover'];
+                        $commonConfig['version'] = 'V' . str_replace('^','',$package['require']['plantation/clover']);
                     }
                     $package = null;
                 }
+
                 $composerJsonPath = null;
 
                 Cache::instance( File::instance('',$commonConfigCachePath))->set('CommonConfig',$commonConfig);
@@ -185,7 +186,7 @@ class Core{
             if (is_file($composerJsonPath)){
                 $package = json_decode(file_get_contents($composerJsonPath),true);
                 if (isset($package['require']['plantation/clover'])){
-                    $commonConfig['version'] = 'V' . $package['require']['plantation/clover'];
+                    $commonConfig['version'] = 'V' . str_replace('^','',$package['require']['plantation/clover']);
                 }
                 $package = null;
             }
