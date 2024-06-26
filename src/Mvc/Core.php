@@ -93,9 +93,9 @@ class Core{
          */
         if ($env['Cache']==true){
             $commonConfigPath = ROOT_PATH .'Application' . DIRECTORY_SEPARATOR . 'Config';
-            $commonConfigCachePath = ROOT_PATH .'Run' . DIRECTORY_SEPARATOR . 'Cache';
+            $commonConfigCachePath = ROOT_PATH .'Run' . DIRECTORY_SEPARATOR . 'System' . DIRECTORY_SEPARATOR;
 
-            $commonConfigCache = Cache::instance( File::instance('',$commonConfigCachePath))->get('CommonConfig');
+            $commonConfigCache = Cache::instance( File::instance($commonConfigCachePath))->get('CommonConfig');
 
             if ($commonConfigCache){
                 $commonConfig = $commonConfigCache;
@@ -116,7 +116,7 @@ class Core{
 
                 $composerJsonPath = null;
 
-                Cache::instance( File::instance('',$commonConfigCachePath))->set('CommonConfig',$commonConfig);
+                Cache::instance( File::instance($commonConfigCachePath))->set('CommonConfig',$commonConfig);
             }
 
             /**
@@ -162,17 +162,17 @@ class Core{
             /**
              * app 专用配置
              */
-            $appConfigCachePath = ROOT_PATH .'Run' . DIRECTORY_SEPARATOR . 'Cache' .DIRECTORY_SEPARATOR. 'Application' . DIRECTORY_SEPARATOR . $realAppName;
-            $appConfigCache = Cache::instance( File::instance('',$appConfigCachePath))->get('AppConfig');
+            $appConfigCachePath = ROOT_PATH .'Run' . DIRECTORY_SEPARATOR . 'Cache' .DIRECTORY_SEPARATOR. 'Application' . DIRECTORY_SEPARATOR . $realAppName . DIRECTORY_SEPARATOR;
+            $appConfigCache = Cache::instance( File::instance($appConfigCachePath))->get('AppConfig');
 
             if ($appConfigCache){
                 $appConfig = $appConfigCache;
                 $appConfigCache = null;
             }else{
-                $appConfigPath = ROOT_PATH .'Application' . DIRECTORY_SEPARATOR . 'Src' . DIRECTORY_SEPARATOR .  $appName . DIRECTORY_SEPARATOR . 'Config';
+                $appConfigPath = ROOT_PATH .'Application' . DIRECTORY_SEPARATOR . 'Src' . DIRECTORY_SEPARATOR .  $realAppName . DIRECTORY_SEPARATOR . 'Config';
                 $appConfig = Config::instance( $appConfigPath)->scanFiles();
                 $appConfig = Config::instance()->pathsToTree($appConfig);
-                Cache::instance( File::instance('',$appConfigCachePath))->set('AppConfig',$appConfig);
+                Cache::instance( File::instance($appConfigCachePath))->set('AppConfig',$appConfig);
             }
             $appConfigCache = null;
             $appConfigCachePath = null;
@@ -386,7 +386,7 @@ class Core{
                 $coreFunctionCachePath = ROOT_PATH .'Run' . DIRECTORY_SEPARATOR . 'Cache' .DIRECTORY_SEPARATOR. 'functions';
                 if ($env['Cache']==true){
                     // 载入functions
-                    $corefunctionCache = Cache::instance( File::instance('',$coreFunctionCachePath))->get('coreFunction');
+                    $corefunctionCache = Cache::instance( File::instance($coreFunctionCachePath))->get('coreFunction');
 
                     if ($corefunctionCache){
                     }else{
@@ -398,7 +398,7 @@ class Core{
                             $files = null;
                             $coreFunctionPath = null;
 
-                            Cache::instance( File::instance('',$coreFunctionCachePath))->set('coreFunction',$coreFunctionCacheArr);
+                            Cache::instance( File::instance($coreFunctionCachePath))->set('coreFunction',$coreFunctionCacheArr);
                             $coreFunctionCacheArr = null;
                         }
                     }

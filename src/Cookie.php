@@ -47,6 +47,23 @@ class Cookie
     }
 
     /**
+     * @param $val
+     * @return mixed
+     * 获得解密的数据
+     */
+    public function getDecrypted($val){
+        return $this->adapter->getDecrypted($val);
+    }
+
+    /**
+     * @param $key
+     * 获取未解密的数据
+     */
+    public function getNotDecrypted($key){
+        return $this->adapter->getNotDecrypted($key);
+    }
+
+    /**
      * @param $key
      * @return mixed
      * 删除cookie

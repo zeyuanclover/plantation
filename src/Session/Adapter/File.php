@@ -104,4 +104,34 @@ class File{
     public function expire($key,$expire){
         $_SESSION[$key]['expire'] = $expire;
     }
+
+    /**
+     * @param $key
+     * 获取未解密数据
+     */
+    public function getNotDecrypted($key){
+        $session = $_SESSION[$key]['data'];
+        $expire = $_SESSION[$key]['expire'];
+
+        if ($expire==true||$expire>=time()){
+            if($session){
+                return $session;
+            }else{
+                return null;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param $val
+     * @return null
+     * 获取解密的数据
+     */
+    public function getDecrypted($val){
+        if (!$val){
+            return null;
+        }
+        return $val;
+    }
 }

@@ -9,22 +9,18 @@ class FileCertificateEncryption
     protected static $path = null;
     protected static $obj = null;
     private static $cePath;
-    public static function instance($obj,$path,$perm){
-        $configs['path'] = $path;
-        if (isset($configs['path'])){
-            self::$path = $configs['path'];
-        }else{
-            self::$path = ROOT_PATH . 'Run' . DIRECTORY_SEPARATOR .'Cache';
+    public static function instance($path,$perm){
+        if (!is_dir($path)){
+            mkdir($path,0777,true);
         }
 
-        if (!is_dir(self::$path)){
-            mkdir(self::$path,0777,true);
+        $path = str_replace('/',DIRECTORY_SEPARATOR,$path);
+        if (substr($path,-1)!==DIRECTORY_SEPARATOR){
+            $path .= DIRECTORY_SEPARATOR;
         }
-        self::$path = rtrim(self::$path,'/');
-        self::$path = rtrim(self::$path,'\\');
-        self::$path .= DIRECTORY_SEPARATOR;
-        if (!is_dir(self::$path)){
-            mkdir(self::$path,0777,true);
+
+        if(is_dir($path)){
+            self::$path = $path;
         }
 
         self::$cePath = $perm;
@@ -39,12 +35,9 @@ class FileCertificateEncryption
             if(isset($cache['content'])){
                 if(isset($cache['expire'])){
                     if ($cache['expire']==true||$cache['expire']>time()){
-                        $cert = new Certificate(ROOT_PATH.self::$cePath['private'],ROOT_PATH.self::$cePath['public']);
+                        $cert = new Certificate(self::$cePath['private'],self::$cePath['public']);
                         $val = json_decode($cert->privDecrypt($cache['content']),true);
-                        if (isset($val['data'])){
-                            return $val['data'];
-                        }
-                        return null;
+                        return $val;
                     }
                 }
             }
@@ -57,7 +50,7 @@ class FileCertificateEncryption
     // 设置缓存
     public function set($name,$value,$expire=true){
         $file = self::$path.$name.'.php';
-        $cert = new Certificate(ROOT_PATH.self::$cePath['private'],ROOT_PATH.self::$cePath['public']);
+        $cert = new Certificate(self::$cePath['private'],self::$cePath['public']);
 
         $data = [
             'content'=>'',
@@ -103,5 +96,41 @@ class FileCertificateEncryption
         if (is_file($file)) {
             unlink($file);
         }
+    }
+
+    /**
+     * @param $name
+     * @return mixed|null
+     * 获取未解密的数据
+     */
+    public function getNotDecrypted($name){
+        $file = self::$path.$name.'.php';
+        if(is_file($file)){
+            $cache = include ($file);
+            if(isset($cache['content'])){
+                if(isset($cache['expire'])){
+                    if ($cache['expire']==true||$cache['expire']>time()){
+                        if (isset($cache['content'])){
+                            return $cache['content'];
+                        }else{
+                            return null;
+                        }
+                    }
+                }
+            }
+            return null;
+        }else{
+            return null;
+        }
+    }
+
+    /**
+     * @param $val
+     * @return mixed
+     * 获得解密数据
+     */
+    public function getDecrypted($val){
+        $cert = new Certificate(self::$cePath['private'],self::$cePath['public']);
+        return json_decode($cert->privDecrypt($val),true);
     }
 }

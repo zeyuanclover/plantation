@@ -2,26 +2,25 @@
 
 namespace Plantation\Clover\Cache\Adapter;
 
+use Plantation\Clover\Safe\Adapter\Certificate;
+
 class File
 {
     protected static $path = null;
     protected static $instance;
     protected static $obj = null;
-    public static function instance($instance,$path){
-        $configs['path'] = $path;
-        if (isset($configs['path'])){
-            self::$path = $configs['path'];
-        }else{
-            self::$path = ROOT_PATH . 'Run' . DIRECTORY_SEPARATOR .'Cache';
+    public static function instance($path){
+        if (!is_dir($path)){
+            mkdir($path,0777,true);
         }
-        if (!is_dir(self::$path)){
-            mkdir(self::$path,0777,true);
+
+        $path = str_replace('/',DIRECTORY_SEPARATOR,$path);
+        if (substr($path,-1)!==DIRECTORY_SEPARATOR){
+            $path .= DIRECTORY_SEPARATOR;
         }
-        self::$path = rtrim(self::$path,'/');
-        self::$path = rtrim(self::$path,'\\');
-        self::$path .= DIRECTORY_SEPARATOR;
-        if (!is_dir(self::$path)){
-            mkdir(self::$path,0777,true);
+
+        if(is_dir($path)){
+            self::$path = $path;
         }
         return new File();
     }
@@ -75,6 +74,23 @@ class File
             }
             file_put_contents($file,'<?php return '.var_export($data,true).';');
         }
+    }
+
+    /**
+     * @param $key
+     * 获取未解密数据
+     */
+    public function getNotDecrypted($key){
+        return $this->get($key);
+    }
+
+    /**
+     * @param $val
+     * @return null
+     * 获取解密的数据
+     */
+    public function getDecrypted($val){
+        return $val;
     }
 
     /**

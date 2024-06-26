@@ -37,7 +37,7 @@ class RedisCertificateEncription{
         $value = $this->redis->get($key);
 
         if(isset($value)){
-            $cert = new Certificate(ROOT_PATH.$this->path['private'],ROOT_PATH.$this->path['public']);
+            $cert = new Certificate($this->path['private'],$this->path['public']);
             $val = $cert->privDecrypt($value);
             return $val;
         }else{
@@ -57,7 +57,7 @@ class RedisCertificateEncription{
             $val = json_encode($val);
         }
 
-        $cert = new Certificate(ROOT_PATH.$this->path['private'],ROOT_PATH.$this->path['public']);
+        $cert = new Certificate($this->path['private'],$this->path['public']);
         $val = $cert->publicEncrypt($val);
         if ($expire>0){
             $this->redis->set($key,$val);
@@ -111,5 +111,26 @@ class RedisCertificateEncription{
      */
     public function ttl($key){
         return $this->redis->ttl($key);
+    }
+
+    /**
+     * @param $key
+     * 获取未解密数据
+     */
+    public function getNotDecrypted($key){
+        return $this->redis->get($key);
+    }
+
+    /**
+     * @param $val
+     * @return null
+     * 获取解密的数据
+     */
+    public function getDecrypted($val){
+        if (!$val){
+            return null;
+        }
+        $rsa = new Certificate($this->config['private'],$this->config['public']);
+        return $rsa->privDecrypt($val);
     }
 }

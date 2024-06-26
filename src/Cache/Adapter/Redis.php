@@ -98,4 +98,21 @@ class Redis{
     public function expire($key,$expire){
         return $this->redis->expire($key,$expire);
     }
+
+    /**
+     * @param $key
+     * 获取未解密数据
+     */
+    public function getNotDecrypted($key){
+       return $this->get($key);
+    }
+
+    /**
+     * @param $val
+     * @return null
+     * 获取解密的数据
+     */
+    public function getDecrypted($val){
+        return $val;
+    }
 }

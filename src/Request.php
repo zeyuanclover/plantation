@@ -540,4 +540,35 @@ class Request
     function getServerHttpClientIp(){
         return $this->serverWork('HTTP_CLIENT_IP');
     }
+
+    /**
+     * @return mixed|string
+     * 获取ip
+     */
+    function getClientIp()
+    {
+        if (isset($_SERVER['http_cf_connecting_ip'])) { // 支持Cloudflare
+            $ip = $_SERVER['http_cf_connecting_ip'];
+        } elseif (isset($_SERVER['REMOTE_ADDR']) === true) {
+            $ip = $_SERVER['REMOTE_ADDR'];
+            if (preg_match('/^(?:127|10)\.0\.0\.[12]?\d{1,2}$/', $ip)) {
+                if (isset($_SERVER['HTTP_X_REAL_IP'])) {
+                    $ip = $_SERVER['HTTP_X_REAL_IP'];
+                } elseif (isset($_SERVER['http_x_forewarded_for'])) {
+                    $ip = $_SERVER['http_x_forewarded_for'];
+                }
+            }
+        } else {
+            $ip = '127.0.0.1';
+        }
+        if (in_array($ip, ['::1', '0.0.0.0', '本地主机'], true)) {
+            $ip = '127.0.0.1';
+        }
+        $filter = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
+        if ($filter === false) {
+            $ip = '127.0.0.1';
+        }
+
+        return $ip;
+    }
 }

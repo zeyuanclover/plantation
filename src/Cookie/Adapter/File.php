@@ -31,15 +31,41 @@ class File{
      * @return mixed|null
      */
     public function get($key){
-        $cookie = $_COOKIE[$key];
-
-        if(isset($cookie)){
+        if(isset($_COOKIE[$key])){
+            $cookie = $_COOKIE[$key];
             $rsa = new Certificate($this->config['private'],$this->config['public']);
             $val = $rsa->privDecrypt($cookie);
             return $val;
         }else{
             return null;
         }
+    }
+
+    /**
+     * @param $key
+     * 获取未解密数据
+     */
+    public function getNotDecrypted($key){
+        if(isset($_COOKIE[$key])){
+            return $_COOKIE[$key];
+        }else{
+            return null;
+        }
+    }
+
+    /**
+     * @param $val
+     * @return null
+     * 获取解密的数据
+     */
+    public function getDecrypted($val){
+        if (!$val){
+            return null;
+        }
+        $cookie = $val;
+        $rsa = new Certificate($this->config['private'],$this->config['public']);
+        $val = $rsa->privDecrypt($cookie);
+        return $val;
     }
 
     /**
