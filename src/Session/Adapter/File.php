@@ -53,6 +53,10 @@ class File{
             $val = json_encode($val);
         }
 
+        if ($expire!==true){
+            $expire +=time();
+        }
+
         $rsa = new Certificate($this->config['private'],$this->config['public']);
         $val = $rsa->publicEncrypt($val);
 

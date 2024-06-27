@@ -51,6 +51,10 @@ class File
             'expire'=>$expire,
         ];
 
+        if ($expire!==true){
+            $data['expire'] = $expire + time();
+        }
+
         file_put_contents($file,'<?php return '.var_export($data,true).';');
     }
 
@@ -63,7 +67,7 @@ class File
         $file = self::$path.$name.'.php';
         if(is_file($file)) {
             $data = include($file);
-            $data['expire'] = $expire;
+            $data['expire'] = $expire +time();
             file_put_contents($file,'<?php return '.var_export($data,true).';');
         }
     }

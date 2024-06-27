@@ -78,6 +78,10 @@ class Mysql{
             $value = json_encode($value);
         }
 
+        if($expire!==true){
+            $expire += time();
+        }
+
         $hasData = $this->instance->where('Name',$key)->getValue($this->table,'ID');
         if(!$hasData){
             return $this->instance->insert($this->table,['Value'=>$value,'Name'=>$key,'Expire'=>$expire,'CreateAt'=>time()]);
@@ -125,7 +129,7 @@ class Mysql{
         if(!$hasData){
             return false;
         }else{
-            return $this->instance->where('Name',$key)->update($this->table,['Expire'=>$expire,'UpdateAt'=>time()]);
+            return $this->instance->where('Name',$key)->update($this->table,['Expire'=>$expire+time(),'UpdateAt'=>time()]);
         }
     }
 

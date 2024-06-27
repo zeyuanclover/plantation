@@ -33,7 +33,7 @@ class Cookie
      * @return mixed
      * 设置cookie
      */
-    public function set($key, $value, $expire=null, $path='/', $domain=null){
+    public function set($key, $value, $expire=true, $path='/', $domain=null){
         return $this->adapter->set($key, $value, $expire, $path, $domain);
     }
 
@@ -68,7 +68,7 @@ class Cookie
      * @return mixed
      * 删除cookie
      */
-    public function delete($key){
-        return $this->adapter->delete($key);
+    public function delete($key,$path='/', $domain=null){
+        return $this->adapter->delete($key,$path, $domain);
     }
 }

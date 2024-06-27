@@ -75,13 +75,13 @@ class File{
      * @param $arr_cookie_options
      * @return bool
      */
-    public function set($key, $value, $expire=null, $path='/', $domain=null){
+    public function set($key, $value, $expire=true, $path='/', $domain=null){
         if (is_array($value)){
             $value = json_encode($value);
         }
 
-        if ($expire===null){
-            $expire = (3600 * 24 * 90);
+        if ($expire===true){
+            $expire = time() + (3600 * 24 * 90);
         }
 
         $rsa = new Certificate($this->config['private'],$this->config['public']);
@@ -95,10 +95,10 @@ class File{
      * @param $arr_cookie_options
      * @return true
      */
-    public function remove($key){
+    public function remove($key,$path, $domain){
         $cookieExpire = time() - 1000;
         $val = '';
-        return setcookie($key, $val, $cookieExpire);
+        return setcookie($key, $val, $cookieExpire,$path, $domain);
     }
 
     /**
@@ -106,10 +106,10 @@ class File{
      * @param $key
      * @return bool
      */
-    public function delete($key){
+    public function delete($key,$path, $domain){
         $cookieExpire = time() - 1000;
         $val = '';
-        return setcookie($key, $val, $cookieExpire);
+        return setcookie($key, $val, $cookieExpire,$path, $domain);
     }
 
     /**
