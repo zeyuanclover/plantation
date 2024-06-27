@@ -1,4 +1,5 @@
 <?php
+namespace Plantation\Clover\Functions;
 /**
  * 校验json字符串
  * @param string $stringData

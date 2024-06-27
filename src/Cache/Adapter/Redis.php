@@ -49,12 +49,12 @@ class Redis{
      * @param $arr_cookie_options
      * @return bool
      */
-    public function set($key,$val,$expire=0){
+    public function set($key,$val,$expire=true){
         if (is_array($val)){
             $val = json_encode($val);
         }
 
-        if ($expire>0){
+        if ($expire!==true){
             $this->redis->set($key,$val);
             return $this->redis->expire($key,$expire);
         }
@@ -114,5 +114,14 @@ class Redis{
      */
     public function getDecrypted($val){
         return $val;
+    }
+
+    /**
+     * @param $key
+     * @return mixed
+     * 获得剩余时间
+     */
+    public function ttl($key){
+        return $this->redis->ttl($key);
     }
 }

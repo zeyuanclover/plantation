@@ -56,12 +56,6 @@ class File{
         $rsa = new Certificate($this->config['private'],$this->config['public']);
         $val = $rsa->publicEncrypt($val);
 
-        if ($expire===true){
-
-        }else{
-            $expire = time() + $expire;
-        }
-
         $_SESSION[$key]['expire'] = $expire;
         $_SESSION[$key]['data'] = $val;
     }
@@ -133,5 +127,16 @@ class File{
             return null;
         }
         return $val;
+    }
+
+    /**
+     * @param $key
+     * @return int|mixed
+     * 获取剩余时间
+     */
+    public function ttl($key){
+        if (isset($_SESSION[$key]['expire'])){
+            return $_SESSION[$key]['expire'] - time();
+        }
     }
 }

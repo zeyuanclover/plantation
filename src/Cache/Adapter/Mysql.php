@@ -20,7 +20,7 @@ class Mysql{
      * 调用函数
      * @return Cookie
      */
-    public static function instance($instance,$table){
+    public static function instance($instance,$table='config'){
         return new Mysql($instance,$table);
     }
 
@@ -42,7 +42,7 @@ class Mysql{
     public function get($key){
         $data = $this->instance->where('Name',$key)->getOne($this->table);
         if ($data){
-            if ($data['Expire']==1 || $data['Expire'] > time()){
+            if ($data['Expire']==='true' || $data['Expire'] > time()){
                 return $data['Value'];
             }
         }
@@ -76,14 +76,6 @@ class Mysql{
     public function set($key,$value,$expire=true){
         if (is_array($value)){
             $value = json_encode($value);
-        }
-
-        if ($expire === true){
-
-        }else{
-            if ($expire>0){
-                $expire = time() + $expire;
-            }
         }
 
         $hasData = $this->instance->where('Name',$key)->getValue($this->table,'ID');
@@ -129,19 +121,23 @@ class Mysql{
      * 过期设置
      */
     public function expire($key,$expire){
-        if ($expire === true){
-
-        }else{
-            if ($expire>0){
-                $expire = time() + $expire;
-            }
-        }
-
         $hasData = $this->instance->where('Name',$key)->getValue($this->table,'ID');
         if(!$hasData){
             return false;
         }else{
             return $this->instance->where('Name',$key)->update($this->table,['Expire'=>$expire,'UpdateAt'=>time()]);
         }
+    }
+
+    /**
+     * @param $key
+     * @return int
+     * 获得剩余时间
+     */
+    public function ttl($key){
+       $expire = $this->instance->where('Name',$key)->getValue($this->table,'Expire');
+       if ($expire!=='true'){
+           return $expire - time();
+       }
     }
 }

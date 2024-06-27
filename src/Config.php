@@ -33,20 +33,6 @@ class Config
     }
 
     /**
-     * @param $fileName
-     * 载入单个文件
-     */
-    public function loadSingle($fileName)
-    {
-        $content = File::instance($this->dir)->load($fileName);
-        if (isset($content['content'])) {
-            return $content['content'];
-        } else {
-            return null;
-        }
-    }
-
-    /**
      * 载入某个目录下所有文件
      */
 

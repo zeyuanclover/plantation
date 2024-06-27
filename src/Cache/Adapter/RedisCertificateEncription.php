@@ -7,15 +7,15 @@ use Plantation\Clover\Safe\Adapter\Certificate;
 class RedisCertificateEncription{
 
     protected $redis;
-    private $path;
+    private $config;
     private static $instance;
 
     /**
      * 调用函数
      * @return Cookie
      */
-    public static function instance($instance,$path){
-        new RedisCertificateEncription($instance,$path);
+    public static function instance($instance,$config){
+        new RedisCertificateEncription($instance,$config);
     }
 
     /**
@@ -23,9 +23,9 @@ class RedisCertificateEncription{
      * @param $instance
      * 构造函数
      */
-    public function __construct($instance,$path){
+    public function __construct($instance,$config){
         $this->redis = $instance;
-        $this->path = $path;
+        $this->config = $config;
     }
 
     /**
@@ -37,9 +37,8 @@ class RedisCertificateEncription{
         $value = $this->redis->get($key);
 
         if(isset($value)){
-            $cert = new Certificate($this->path['private'],$this->path['public']);
-            $val = $cert->privDecrypt($value);
-            return $val;
+            $cert = new Certificate($this->config['private'],$this->config['public']);
+            return $cert->privDecrypt($value);
         }else{
             return null;
         }
@@ -52,14 +51,14 @@ class RedisCertificateEncription{
      * @param $arr_cookie_options
      * @return bool
      */
-    public function set($key,$val,$expire=0){
+    public function set($key,$val,$expire=true){
         if (is_array($val)){
             $val = json_encode($val);
         }
 
-        $cert = new Certificate($this->path['private'],$this->path['public']);
+        $cert = new Certificate($this->config['private'],$this->config['public']);
         $val = $cert->publicEncrypt($val);
-        if ($expire>0){
+        if ($expire!==true){
             $this->redis->set($key,$val);
             return $this->redis->expire($key,$expire);
         }

@@ -75,25 +75,18 @@ class File{
      * @param $arr_cookie_options
      * @return bool
      */
-    public function set($key,$val,$arr_cookie_options=null){
-        if (is_array($val)){
-            $val = json_encode($val);
+    public function set($key, $value, $expire=null, $path='/', $domain=null){
+        if (is_array($value)){
+            $value = json_encode($value);
         }
 
-        if(!$arr_cookie_options){
-            $arr_cookie_options = array (
-                'expires' => time() + 60*60*24*365,
-                'path' => '/',
-                'domain' => '', // leading dot for compatibility or use subdomain
-                'secure' => false,     // or false
-                'httponly' => false,    // or false
-                'samesite' => 'Strict' // None || Lax  || Strict
-            );
+        if ($expire===null){
+            $expire = (3600 * 24 * 90);
         }
 
         $rsa = new Certificate($this->config['private'],$this->config['public']);
-        $val = $rsa->publicEncrypt($val);
-        return setcookie($key, $val, $arr_cookie_options);
+        $val = $rsa->publicEncrypt($value);
+        return setcookie($key, $val, $expire,$path,$domain);
     }
 
     /**
@@ -102,11 +95,10 @@ class File{
      * @param $arr_cookie_options
      * @return true
      */
-    public function remove($key,$arr_cookie_options=[]){
-        $arr_cookie_options['expires'] = time() - 1000;
+    public function remove($key){
+        $cookieExpire = time() - 1000;
         $val = '';
-        unset($_COOKIE[$key]);
-        return setcookie($key, $val, $arr_cookie_options);
+        return setcookie($key, $val, $cookieExpire);
     }
 
     /**
@@ -115,10 +107,9 @@ class File{
      * @return bool
      */
     public function delete($key){
-        $arr_cookie_options['expires'] = time() - 1000;
+        $cookieExpire = time() - 1000;
         $val = '';
-        unset($_COOKIE[$key]);
-        return setcookie($key, $val, $arr_cookie_options);
+        return setcookie($key, $val, $cookieExpire);
     }
 
     /**
@@ -129,12 +120,8 @@ class File{
      * @return void
      */
     public function clear(){
-        $val = '';
-        $arr_cookie_options['expires'] = time() - 1000;
-        foreach ($_COOKIE as $cookieName => $cookieValue) {
-            if($cookieName!='PHPSESSID'){
-                setcookie($cookieName, '', $arr_cookie_options);
-            }
+        foreach (($_COOKIE) as $key => $value) {
+            setcookie($key, '', time() - 3600);
         }
     }
 }

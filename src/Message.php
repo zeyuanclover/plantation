@@ -4,6 +4,8 @@
 namespace Plantation\Clover;
 
 use Plantation\Clover\Message\Adapter\Json as JsonMessage;
+use Plantation\Clover\Message\Adapter\Str;
+use Plantation\Clover\Message\Adapter\Template;
 
 class Message
 {
@@ -30,8 +32,10 @@ class Message
                 $this->adapterInstance = new JsonMessage();
                 break;
             case 'template':
+                $this->adapterInstance = new Template();
                 break;
             case 'str':
+                $this->adapterInstance = new Str();
                 break;
         }
     }

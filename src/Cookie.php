@@ -33,8 +33,8 @@ class Cookie
      * @return mixed
      * 设置cookie
      */
-    public function set($key,$data,$config=null){
-        return $this->adapter->set($key,$data,$config);
+    public function set($key, $value, $expire=null, $path='/', $domain=null){
+        return $this->adapter->set($key, $value, $expire, $path, $domain);
     }
 
     /**

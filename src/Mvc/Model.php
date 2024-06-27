@@ -11,9 +11,17 @@ class Model{
      * @param $adapter
      * 构造方法
      */
-    public function __construct($adapter){
+    public function __construct($adapter=null){
         if (!$this->instance){
-            $this->instance = $adapter;
+            if(!$adapter){
+                if (isset($_SERVER['mysqlMaster'])){
+                    $this->instance = $_SERVER['mysqlMaster'];
+                }else{
+                    $this->instance = $adapter;
+                }
+            }else{
+                $this->instance = $adapter;
+            }
         }
     }
 

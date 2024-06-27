@@ -53,13 +53,8 @@ class FileCertificateEncryption
         $cert = new Certificate(self::$cePath['private'],self::$cePath['public']);
 
         $data = [
-            'content'=>'',
-            'expire'=>time()+$expire,
+            'expire'=>$expire,
         ];
-
-        if ($expire==true){
-            $data['expire'] = $expire;
-        }
 
         $val = $cert->publicEncrypt(json_encode(['data'=>$value]));
         $data['content'] = $val;
@@ -76,11 +71,7 @@ class FileCertificateEncryption
         $file = self::$path.$name.'.php';
         if(is_file($file)) {
             $data = include($file);
-            if ($expire==true){
-                $data['expire'] = $expire;
-            }else{
-                $data['expire'] = time()+$expire;
-            }
+            $data['expire'] = $expire;
             file_put_contents($file,'<?php return '.var_export($data,true).';');
         }
     }
@@ -131,6 +122,26 @@ class FileCertificateEncryption
      */
     public function getDecrypted($val){
         $cert = new Certificate(self::$cePath['private'],self::$cePath['public']);
-        return json_decode($cert->privDecrypt($val),true);
+        return $cert->privDecrypt($val);
+    }
+
+    /**
+     * @param $key
+     * @return int|mixed
+     * 过期时间
+     */
+    public function ttl($key){
+        $file = self::$path.$name.'.php';
+        if(is_file($file)){
+            $cache = include ($file);
+            if(isset($cache['content'])){
+                if(isset($cache['expire'])){
+                   return $cache['expire'] - time();
+                }
+            }
+            return 0;
+        }else{
+            return 0;
+        }
     }
 }
