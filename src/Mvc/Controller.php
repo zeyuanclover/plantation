@@ -61,8 +61,12 @@ class Controller{
     public function readTemplate($name,$nameAdditional=null){
         // 查找模板名称
         $config['theme'] = 'default';
-        if(isset($this->config['appConfig']['Application']['theme'])){
-            $config['theme'] = $this->config['appConfig']['Application']['theme'];
+        if (isset($this->administrator['Theme'])){
+            $config['theme'] = $this->administrator['Theme'];
+        }else{
+            if(isset($this->config['appConfig']['Application']['theme'])){
+                $config['theme'] = $this->config['appConfig']['Application']['theme'];
+            }
         }
 
         // 载入模板函数
@@ -96,11 +100,19 @@ class Controller{
      * @param null $nameAdditional
      * 加载模板
      */
-    public function template($name,$cacheSwitch=false,$nameAdditional=null){
+    public function template($name,$cacheSwitch=false,$nameAdditional=null,$theme=null){
         // 查找模板名称
         $config['theme'] = 'default';
-        if(isset($this->config['appConfig']['Application']['theme'])){
-            $config['theme'] = $this->config['appConfig']['Application']['theme'];
+        if ($theme){
+            $config['theme'] = $theme;
+        }else{
+            if (isset($this->administrator['Theme'])){
+                $config['theme'] = $this->administrator['Theme'];
+            }else{
+                if(isset($this->config['appConfig']['Application']['theme'])){
+                    $config['theme'] = $this->config['appConfig']['Application']['theme'];
+                }
+            }
         }
 
         // 载入模板函数
@@ -220,8 +232,12 @@ class Controller{
      public function controllerTemplate($name,$cacheSwitch=false,$nameAdditional=null){
          // 查找模板名称
          $config['theme'] = 'default';
-         if(isset($this->config['appConfig']['Application']['theme'])){
-             $config['theme'] = $this->config['appConfig']['Application']['theme'];
+         if (isset($this->administrator['Theme'])){
+             $config['theme'] = $this->administrator['Theme'];
+         }else{
+             if(isset($this->config['appConfig']['Application']['theme'])){
+                 $config['theme'] = $this->config['appConfig']['Application']['theme'];
+             }
          }
 
          $controller = strtolower(str_replace('Controller','',$this->config['controller']));

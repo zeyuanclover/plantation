@@ -44,6 +44,7 @@ class Template{
                 'error'=>false
             ]);
         }
+
         return $path;
     }
 }
