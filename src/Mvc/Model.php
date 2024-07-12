@@ -40,4 +40,20 @@ class Model{
     public function db(){
         return $this->instance;
     }
+
+    public function __call($name, $arguments)
+    {
+        if (method_exists($this->instance,$name)){
+            if(isset($arguments[0]) && isset($arguments[1])){
+                if (isset($arguments[2])){
+                    if (isset($arguments[3])){
+                        return $this->instance->$name($arguments[0],$arguments[1],$arguments[2],$arguments[3]);
+                    }
+                    return $this->instance->$name($arguments[0],$arguments[1],$arguments[2]);
+                }else{
+                    return $this->instance->$name($arguments[0],$arguments[1]);
+                }
+            }
+        }
+    }
 }

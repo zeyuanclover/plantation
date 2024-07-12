@@ -61,7 +61,7 @@ class Controller{
     public function readTemplate($name,$nameAdditional=null){
         // 查找模板名称
         $config['theme'] = 'default';
-        if (isset($this->administrator['Theme'])){
+        if (isset($this->administrator['Theme'])&&$this->administrator['Theme']){
             $config['theme'] = $this->administrator['Theme'];
         }else{
             if(isset($this->config['appConfig']['Application']['theme'])){
@@ -106,7 +106,7 @@ class Controller{
         if ($theme){
             $config['theme'] = $theme;
         }else{
-            if (isset($this->administrator['Theme'])){
+            if (isset($this->administrator['Theme'])&&$this->administrator['Theme']){
                 $config['theme'] = $this->administrator['Theme'];
             }else{
                 if(isset($this->config['appConfig']['Application']['theme'])){
@@ -232,7 +232,7 @@ class Controller{
      public function controllerTemplate($name,$cacheSwitch=false,$nameAdditional=null){
          // 查找模板名称
          $config['theme'] = 'default';
-         if (isset($this->administrator['Theme'])){
+         if (isset($this->administrator['Theme'])&&$this->administrator['Theme']){
              $config['theme'] = $this->administrator['Theme'];
          }else{
              if(isset($this->config['appConfig']['Application']['theme'])){

@@ -44,7 +44,7 @@ class Cache
      * @param $data
      * 设置
      */
-    public function set($name,$data,$expire=0){
+    public function set($name,$data,$expire=true){
         $this->adapter->set($name,$data,$expire);
     }
 
