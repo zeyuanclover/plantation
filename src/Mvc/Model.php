@@ -12,16 +12,16 @@ class Model{
      * 构造方法
      */
     public function __construct($adapter=null){
-        if (!$this->instance){
-            if(!$adapter){
-                if (isset($_SERVER['mysqlMaster'])){
-                    $this->instance = $_SERVER['mysqlMaster'];
-                }else{
-                    $this->instance = $adapter;
-                }
-            }else{
+        if (!$_SERVER['mysql']){
+            if($adapter){
                 $this->instance = $adapter;
+                return $_SERVER['mysql'] = $adapter;
+            }else{
+                return $this->instance = $_SERVER['mysql'];
             }
+        }else{
+            $this->instance = $_SERVER['mysql'];
+            return $_SERVER['mysql'];
         }
     }
 
@@ -41,6 +41,7 @@ class Model{
         return $this->instance;
     }
 
+    // 访问
     public function __call($name, $arguments)
     {
         if (method_exists($this->instance,$name)){
