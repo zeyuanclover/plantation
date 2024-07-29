@@ -150,4 +150,13 @@ class Redis{
     public function deleteAttemp($token){
         $this->client->del('queue_attemp_'.$token);
     }
+
+    /**
+     * @param $key
+     * @return mixed
+     * 获得
+     */
+    public function get($key){
+        return $this->client->get($key);
+    }
 }

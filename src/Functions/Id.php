@@ -42,6 +42,37 @@ function createGuid($namespace = '') {
     return $guid;
 }
 
+function createGuidOrder($namespace = '') {
+    static $guid = '';
+
+    $uid = uniqid("", true);
+    $data = $namespace;
+    $data .= generateGuid($namespace);
+    $hash = strtoupper(hash('ripemd128', $uid . $guid . md5($data)));
+    if($namespace){
+        $prefix = $namespace .
+            round(microtime(true)*1000 ).
+            '-';
+    }else{
+        $prefix = '';
+    }
+
+    $guid = '' .
+        $prefix .
+        substr($hash, 0, 8) .
+        '-' .
+        substr($hash, 8, 4) .
+        '-' .
+        substr($hash, 12, 4) .
+        '-' .
+        substr($hash, 16, 4) .
+        '-' .
+        substr($hash, 20, 12) .
+        '';
+    return $guid;
+}
+
+
 /**
  * @param $prefix
  * @return string

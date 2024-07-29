@@ -44,7 +44,7 @@ class Cache
      * @param $data
      * 设置
      */
-    public function set($name,$data,$expire=true){
+    public function set($name,$data,$expire=0){
         $this->adapter->set($name,$data,$expire);
     }
 
@@ -72,6 +72,15 @@ class Cache
      */
     public function expire($name,$expire){
         $this->adapter->expire($name,$expire);
+    }
+
+    /**
+     * @param $name
+     * @return mixed
+     * 获得剩余时间
+     */
+    public function ttl($name){
+        return $this->adapter->ttl($name);
     }
 
     /**

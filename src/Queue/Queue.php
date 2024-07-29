@@ -8,8 +8,9 @@ class Queue
     public $queueName;
     public $procNum = 8; // 进程总数
     public $param;
+    public $container;
 
-    public function __construct($param){
+    public function __construct($param,$container){
         $temp = [];
         foreach($param as $val){
             $tempVal = $val;
@@ -23,11 +24,13 @@ class Queue
 
         $this->param = $temp;
         $temp = [];
+        $this->container = $container;
     }
 
     // 启动进程
     public function run()
     {
+        $redisInstance = new Redis($this->container->get('redisSingle'));
         if(isset($this->param['threads']) && $this->param['threads']){
             $this->procNum = $this->param['threads'] * 1;
         }
@@ -40,20 +43,21 @@ class Queue
 
         if($this->param['listen']=='stop'){
             fwrite(STDOUT, 'stop'."\n");
-            (new Redis())->setQueueStatus($this->queueName);
+            $redisInstance->setQueueStatus($this->queueName);
             die();
         }
 
         if($this->param['listen']=='start'){
             fwrite(STDOUT, 'start'."\n");
-            (new Redis())->setQueueStatus($this->queueName,1);
+            $redisInstance->setQueueStatus($this->queueName,1);
         }
 
         if($this->param['listen']=='restart'){
             fwrite(STDOUT, 'restart'."\n");
-            (new Redis())->setQueueStatus($this->queueName,1);
+            $redisInstance->setQueueStatus($this->queueName,1);
         }
-
+        $this->work($this->queueName);
+        /*
         for ($i = 0; $i < $this->procNum; $i++) {
             $nPID = \pcntl_fork();//创建子进程
             if ($nPID == 0) {
@@ -71,7 +75,7 @@ class Queue
             if ($nPID > 0) {
                 ++$n;
             }
-        }
+        }*/
 
     }
     // 删除队列
@@ -80,7 +84,7 @@ class Queue
     public function work($queueName)
     {
         //fwrite(STDOUT, $queueName."\n");
-        $redisInstance = new Redis();
+        $redisInstance = new Redis($this->container->get('redisSingle'));
         while (true) {
             $stop = $redisInstance->getQueueStatus($this->queueName);
             //fwrite(STDOUT, $stop."\n");
@@ -92,7 +96,7 @@ class Queue
             if($data){
                 $cpdata = $data = json_decode($data,true);
 
-                $attemp = (new Redis())->getAttemp($this->queueName.$cpdata['token']);
+                $attemp = $redisInstance->getAttemp($this->queueName.$cpdata['token']);
                 if($attemp>0){
                     if($attemp>5){
                         continue;
@@ -100,6 +104,8 @@ class Queue
 
                     $state = $redisInstance->getStatus($this->queueName.$cpdata['token']);
                     if($state=='finish'){
+                        $redisInstance->deleteState($this->queueName.$cpdata['token']);
+                        $redisInstance->deleteAttemp($this->queueName.$cpdata['token']);
                         fwrite(STDOUT,'retry finish'."\n");
                         continue;
                     }
@@ -113,7 +119,7 @@ class Queue
                         echo 'classs '.$data['class'].'不存在！'."\n";
                     }
 
-                    $classInstance = new $data['class']();
+                    $classInstance = new $data['class']($this->container);
                     if(!method_exists($classInstance, $data['function'])){
                         echo 'classs '.$data['class'].' 方法 '.$data['function'].'() 不存在！'."\n";
                     }
@@ -132,8 +138,8 @@ class Queue
                             continue;
                         }
 
-                        $redisInstance->setStatus($this->queueName.$cpdata['token'],'NoReturnValue');
-                        $redisInstance->setAttemp($this->queueName.$cpdata['token']);
+                        $redisInstance->setStatus($this->queueName.$cpdata['token'],'NoReturnValue',24*60*60*15);
+                        $redisInstance->setAttemp($this->queueName.$cpdata['token'],24*60*60*15);
                         $redisInstance->reAdd($this->queueName,json_encode($data));
                     }
                 }

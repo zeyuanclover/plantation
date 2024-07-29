@@ -366,21 +366,6 @@ class Core{
                 $appUrl = null;
                 $parseUrlArr = null;
 
-                // 初始化控制器
-                $instance = new $app($map,$container);
-
-                $container = null;
-                $map = null;
-
-                // 方法是否存在
-                if(!method_exists($instance,$action)){
-                    Message::instance('json')->send([
-                        'message'=>'Line ['.__LINE__.'] -文件'.__FILE__.'-类'.$app.'方法'.$action.'不存在！',
-                        'code'=>'File-1001',
-                        'error'=>false
-                    ]);
-                }
-
                 // 核心函数载入
                 $coreFunctionPath = ROOT_PATH . 'vendor' . DIRECTORY_SEPARATOR . 'plantation' . DIRECTORY_SEPARATOR . 'clover' . DIRECTORY_SEPARATOR  . 'src' .  DIRECTORY_SEPARATOR . 'Functions'; // 替换为你的目录路径
                 $coreFunctionCachePath = ROOT_PATH .'Run' . DIRECTORY_SEPARATOR . 'Cache' .DIRECTORY_SEPARATOR. 'functions';
@@ -417,6 +402,21 @@ class Core{
                 }
 
                 $corefunctionCache = null;
+
+                // 初始化控制器
+                $instance = new $app($map,$container);
+
+                $container = null;
+                $map = null;
+
+                // 方法是否存在
+                if(!method_exists($instance,$action)){
+                    Message::instance('json')->send([
+                        'message'=>'Line ['.__LINE__.'] -文件'.__FILE__.'-类'.$app.'方法'.$action.'不存在！',
+                        'code'=>'File-1001',
+                        'error'=>false
+                    ]);
+                }
 
                 // 调用控制器方法
                 $instance->$action($vars);

@@ -12,7 +12,7 @@ class Model{
      * 构造方法
      */
     public function __construct($adapter=null){
-        if (!$_SERVER['mysql']){
+        if (!isset($_SERVER['mysql'])){
             if($adapter){
                 $this->instance = $adapter;
                 return $_SERVER['mysql'] = $adapter;
