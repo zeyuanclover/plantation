@@ -49,6 +49,7 @@ class Redis{
 
     // 入队列
     public function add($name,$class,$function='perform',$data=[]){
+        $data['t'] = uniqid();
         $data = ['class'=>$class,'function'=>$function,'data'=>$data,'state'=>'ready'];
         $token = md5(uniqid().microtime().json_encode($data).mt_rand(1,99999));
         $data['token'] = $token;

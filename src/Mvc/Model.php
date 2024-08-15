@@ -5,6 +5,7 @@ class Model{
 
     protected $adapter;
     protected $instance;
+    protected $lang;
 
     /**
      * Model constructor.

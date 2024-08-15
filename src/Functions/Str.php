@@ -38,3 +38,34 @@ if (!function_exists('getParents')){
         return $parents;
     }
 }
+
+if (!function_exists('getCurrency')){
+    function getCurrency($price){
+        if(!$price){
+            $price = '0.00';
+        }
+        return '$'.$price;
+    }
+}
+if (!function_exists('getCurrency')) {
+    function getBrowserLanguage($availableLanguages = null)
+    {
+        if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+            $langs = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+
+            // 如果提供了可用语言数组，则进行筛选
+            if ($availableLanguages) {
+                foreach ($langs as $lang) {
+                    $pieces = explode(';q=', trim($lang));
+                    if (in_array($pieces[0], $availableLanguages)) {
+                        return $pieces[0];
+                    }
+                }
+            }
+
+            // 如果没有提供可用语言数组，则返回最高优先级的语言
+            return $langs[0];
+        }
+        return null;
+    }
+}

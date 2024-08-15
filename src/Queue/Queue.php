@@ -130,7 +130,11 @@ class Queue
                     $return = $classInstance->$functionName($jobInstance,$data['data']);
                     if(isset($return['ok'])&&$return['ok']===true){
                         $redisInstance->setStatus($this->queueName.$cpdata['token'],'finish');
-                        echo 'token:{'.$cpdata['token'].'} status - '. $redisInstance->getStatus($this->queueName.$cpdata['token'])."\n";
+                        $msg ='';
+                        if(isset($return['msg'])){
+                            $msg = ' [msg='.$return['msg'].']';
+                        }
+                        echo 'token:{'.$cpdata['token'].'} status - '. $redisInstance->getStatus($this->queueName.$cpdata['token']).$msg."\n";
                         $redisInstance->deleteState($this->queueName.$cpdata['token']);
                         $redisInstance->deleteAttemp($this->queueName.$cpdata['token']);
                     }else{
